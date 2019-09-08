@@ -11,70 +11,114 @@ func TestParse(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := Spec{
-		Package: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-		Name:    "Events",
-		Events: []EventSpec{
+	expected := InterfaceSpec{
+		Name: "Events",
+		Methods: []MethodSpec{
 			{
-				DispatchName:    "Event",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "Event",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: false,
 				ReturnsError:    false,
 			},
 			{
-				DispatchName:    "EventEmbedded",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "EventEmbedded",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "EventEmbeddedFromUnexportedInterface",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "EventEmbeddedFromUnexportedInterface",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "EventWithContext",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "EventWithContext",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    false,
 			},
 			{
-				DispatchName:    "EventWithContextAndError",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "EventWithContextAndError",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "EventWithError",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
-				EventName:       "Event",
+				Name: "EventWithError",
+				Event: TypeSpec{
+					Name: "Event",
+					Package: PackageSpec{
+						Name: "parser",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+					},
+				},
 				ReceivesContext: false,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "ImportedAliasedEvent",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
-				EventName:       "ImportedEvent",
+				Name: "ImportedAliasedEvent",
+				Event: TypeSpec{
+					Name: "ImportedEvent",
+					Package: PackageSpec{
+						Name: "imports",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "ImportedEvent",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
-				EventName:       "ImportedEvent",
+				Name: "ImportedEvent",
+				Event: TypeSpec{
+					Name: "ImportedEvent",
+					Package: PackageSpec{
+						Name: "imports",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
 			{
-				DispatchName:    "ImportedEventDispatch",
-				EventPackage:    "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
-				EventName:       "ImportedEvent",
+				Name: "ImportedEventDispatch",
+				Event: TypeSpec{
+					Name: "ImportedEvent",
+					Package: PackageSpec{
+						Name: "imports",
+						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
+					},
+				},
 				ReceivesContext: true,
 				ReturnsError:    true,
 			},
