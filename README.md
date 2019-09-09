@@ -7,6 +7,12 @@
 **Go application development tool applying modern practices.**
 
 
+## Installation
+
+```bash
+go get sagikazarmark.dev/mga
+```
+
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE) for more information.
