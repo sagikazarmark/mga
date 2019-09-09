@@ -1,0 +1,16 @@
+linters:
+    enable-all: true
+    disable:
+        - maligned
+
+        # Disabled because of Go 1.13
+        - typecheck
+
+linters-settings:
+    golint:
+        min-confidence: 0.1
+    goimports:
+        local-prefixes: sagikazarmark.dev/mga
+
+service:
+    golangci-lint-version: 1.17.x
