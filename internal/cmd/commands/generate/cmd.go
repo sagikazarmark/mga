@@ -3,7 +3,7 @@ package generate
 import (
 	"github.com/spf13/cobra"
 
-	"sagikazarmark.dev/mga/internal/cmd/commands/generate/events"
+	"sagikazarmark.dev/mga/internal/cmd/commands/generate/event"
 )
 
 // NewGenerateCommand returns a cobra command for `generate` subcommands.
@@ -15,7 +15,7 @@ func NewGenerateCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		events.NewEventsCommand(),
+		event.NewEventsCommand(),
 	)
 
 	return cmd

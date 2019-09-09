@@ -1,14 +1,14 @@
-package events
+package event
 
 import (
 	"github.com/spf13/cobra"
 )
 
-// NewEventsCommand returns a cobra command for `events` subcommands.
+// NewEventsCommand returns a cobra command for `event` subcommands.
 func NewEventsCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "events",
-		Aliases: []string{"e", "ev", "event"},
+		Use:     "event",
+		Aliases: []string{"e", "ev", "events"},
 		Short:   "Generate event related code",
 	}
 
