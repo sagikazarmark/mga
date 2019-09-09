@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [0.0.2] - 2019-09-09
+
+
 ## 0.0.1 - 2019-09-09
 
 
-[Unreleased]: https://github.com/sagikazarmark/mga/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/sagikazarmark/mga/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/sagikazarmark/mga/compare/v0.0.1...v0.0.2
