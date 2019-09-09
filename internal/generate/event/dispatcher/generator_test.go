@@ -74,7 +74,7 @@ type EventDispatcher struct {
 
 // NewEventDispatcher returns a new EventDispatcher instance.
 func NewEventDispatcher(bus EventBus) EventDispatcher {
-	return &EventDispatcher{bus: bus}
+	return EventDispatcher{bus: bus}
 }
 
 // MarkedAsDone dispatches a(n) MarkedAsDone event.
@@ -100,7 +100,7 @@ func (d EventDispatcher) MarkedAsDone2(event todo.MarkedAsDone2) error {
 
 // MarkedAsDone3 dispatches a(n) MarkedAsDone3 event.
 func (d EventDispatcher) MarkedAsDone3(ctx context.Context, event todo.MarkedAsDone3) {
-	d.eventBus.Publish(ctx, event)
+	_ = d.bus.Publish(ctx, event)
 }
 `
 

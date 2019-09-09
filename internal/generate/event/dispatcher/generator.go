@@ -57,7 +57,7 @@ func Generate(pkg string, spec InterfaceSpec) (string, error) {
 		Id(eventDispatcherTypeName).
 		Block(
 			jen.Return(
-				jen.Op("&").Id(eventDispatcherTypeName).Values(jen.Dict{
+				jen.Id(eventDispatcherTypeName).Values(jen.Dict{
 					jen.Id(eventBusVarName): jen.Id(eventBusVarName),
 				}),
 			),
@@ -110,7 +110,7 @@ func Generate(pkg string, spec InterfaceSpec) (string, error) {
 				jen.Return(jen.Nil()),
 			)
 		} else {
-			block = append(block, jen.Id("d").Dot("eventBus").Dot("Publish").Call(
+			block = append(block, jen.Id("_").Op("=").Id("d").Dot(eventBusVarName).Dot("Publish").Call(
 				jen.Id("ctx"),
 				jen.Id("event"),
 			))
