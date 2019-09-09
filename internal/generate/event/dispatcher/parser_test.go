@@ -13,6 +13,10 @@ func TestParse(t *testing.T) {
 
 	expected := InterfaceSpec{
 		Name: "Events",
+		Package: PackageSpec{
+			Name: "parser",
+			Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+		},
 		Methods: []MethodSpec{
 			{
 				Name: "Event",
