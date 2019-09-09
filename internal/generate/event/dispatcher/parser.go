@@ -11,6 +11,7 @@ import (
 // InterfaceSpec describes the event dispatcher interface.
 type InterfaceSpec struct {
 	Name    string
+	Package PackageSpec
 	Methods []MethodSpec
 }
 
@@ -59,6 +60,10 @@ func Parse(dir string, interfaceName string) (InterfaceSpec, error) {
 
 		spec := InterfaceSpec{
 			Name: interfaceName,
+			Package: PackageSpec{
+				Name: obj.Pkg().Name(),
+				Path: obj.Pkg().Path(),
+			},
 		}
 
 		for i := 0; i < iface.NumMethods(); i++ {
