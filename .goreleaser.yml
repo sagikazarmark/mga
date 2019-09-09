@@ -1,0 +1,20 @@
+builds:
+    -
+        env:
+            - CGO_ENABLED=0
+        ldflags: "-s -w -X main.version={{ .Version }} -X main.commitHash={{ .ShortCommit }} -X main.buildDate={{ .Date }}"
+        goos:
+            - linux
+            - darwin
+        goarch:
+            - amd64
+
+archives:
+    -
+        name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+
+changelog:
+    skip: true
+
+checksum:
+    name_template: 'checksums.txt'
