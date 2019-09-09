@@ -63,6 +63,15 @@ but interface methods cannot accept or return more or different parameters.
 }
 
 func runDispatcher(options dispatcherOptions) error {
+	indir := "."
+
+	spec, err := dispatcher.Parse(indir, options.from)
+	if err != nil {
+		return err
+	}
+
+	var outpkg string
+
 	if options.outdir == "" {
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -70,11 +79,23 @@ func runDispatcher(options dispatcherOptions) error {
 		}
 
 		options.outdir = filepath.Base(cwd) + "gen"
-	}
+		outpkg = filepath.Base(options.outdir)
+	} else {
+		absOut, err := filepath.Abs(options.outdir)
+		if err != nil {
+			return err
+		}
 
-	spec, err := dispatcher.Parse(".", options.from)
-	if err != nil {
-		return err
+		outpkg = filepath.Base(absOut)
+
+		absIn, err := filepath.Abs(indir)
+		if err != nil {
+			return err
+		}
+
+		if absIn == absOut { // When the input and the output directories are the same
+			outpkg = spec.Package.Path
+		}
 	}
 
 	err = os.MkdirAll(options.outdir, 0755)
@@ -82,7 +103,7 @@ func runDispatcher(options dispatcherOptions) error {
 		return err
 	}
 
-	res, err := dispatcher.Generate(filepath.Base(options.outdir), spec)
+	res, err := dispatcher.Generate(outpkg, spec)
 	if err != nil {
 		return err
 	}
