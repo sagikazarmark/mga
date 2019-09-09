@@ -32,6 +32,8 @@ func Generate(pkg string, spec InterfaceSpec) (string, error) {
 	// TODO: add version
 	file.PackageComment("Code generated with mga")
 
+	file.ImportName("emperror.dev/errors", "errors")
+
 	for _, method := range spec.Methods {
 		file.ImportName(method.Event.Package.Path, method.Event.Package.Name)
 	}

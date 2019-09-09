@@ -57,7 +57,7 @@ package todogen
 
 import (
 	"context"
-	errors "emperror.dev/errors"
+	"emperror.dev/errors"
 	"github.com/sagikazarmark/modern-go-application/internal/app/mga/todo"
 )
 
