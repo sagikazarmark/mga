@@ -2,9 +2,7 @@ linters:
     enable-all: true
     disable:
         - maligned
-
-        # Disabled because of Go 1.13
-        - typecheck
+        - funlen
 
 linters-settings:
     golint:
@@ -13,4 +11,4 @@ linters-settings:
         local-prefixes: sagikazarmark.dev/mga
 
 service:
-    golangci-lint-version: 1.17.x
+    golangci-lint-version: 1.18.x
