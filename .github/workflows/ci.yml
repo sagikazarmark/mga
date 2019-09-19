@@ -26,6 +26,11 @@ jobs:
                 env:
                     VERBOSE: 1
 
+            -   name: Generate code
+                run: make generate
+                env:
+                    VERBOSE: 1
+
             -   name: Tests
                 run: make test
                 env:
