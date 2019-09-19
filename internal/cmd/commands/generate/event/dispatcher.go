@@ -12,8 +12,8 @@ import (
 )
 
 type dispatcherOptions struct {
-	from   string
-	outdir string
+	baseInterface string
+	outdir        string
 }
 
 // NewDispatcherCommand returns a cobra command for generating an event dispatcher.
@@ -21,18 +21,18 @@ func NewDispatcherCommand() *cobra.Command {
 	var options dispatcherOptions
 
 	cmd := &cobra.Command{
-		Use:     "dispatcher",
+		Use:     "dispatcher [options] INTERFACE",
 		Aliases: []string{"d", "disp"},
 		Short:   "Generate an event dispatcher from a base interface",
-		Long: `This command generates a type safe event dispatcher implementation with an underlying, generic event bus.
-The event bus itself is an interface:
+		Long: `This command generates a type safe event dispatcher implementation with an underlying generic event bus.
+The event bus itself is an interface generated alongside the dispatcher:
 
 	type EventBus interface {
 		Publish(ctx context.Context, event interface{}) error
 	}
 
-You can either implement this interface yourself or use an implementation that's already compatible with it.
-For example, Watermill (https://github.com/ThreeDotsLabs/watermill) already has an event bus that's compatible.
+You can either implement this interface yourself or use an implementation that's already compatible with it
+(for example Watermill: https://github.com/ThreeDotsLabs/watermill).
 
 Base interfaces look like the following:
 
@@ -46,9 +46,12 @@ where Event is a simple data structure containing the event payload.
 The context parameter and the error return value are both optional,
 but interface methods cannot accept or return more or different parameters.
 `,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
+
+			options.baseInterface = args[0]
 
 			return runDispatcher(options)
 		},
@@ -56,7 +59,6 @@ but interface methods cannot accept or return more or different parameters.
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&options.from, "from", "Events", "base event dispatcher interface")
 	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
 
 	return cmd
@@ -65,7 +67,7 @@ but interface methods cannot accept or return more or different parameters.
 func runDispatcher(options dispatcherOptions) error {
 	indir := "."
 
-	spec, err := dispatcher.Parse(indir, options.from)
+	spec, err := dispatcher.Parse(indir, options.baseInterface)
 	if err != nil {
 		return err
 	}
