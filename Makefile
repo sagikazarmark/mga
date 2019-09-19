@@ -50,6 +50,10 @@ endif
 	@mkdir -p ${BUILD_DIR}
 	go build ${GOARGS} -trimpath -tags "${GOTAGS}" -ldflags "${LDFLAGS}" -o ${BUILD_DIR}/ .
 
+.PHONY: generate
+generate: ## Generate test code
+	go generate -run "go run sagikazarmark.dev/mga generate" ./...
+
 .PHONY: check
 check: test-all lint ## Run tests and linters
 
