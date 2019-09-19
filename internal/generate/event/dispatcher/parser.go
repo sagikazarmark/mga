@@ -38,7 +38,15 @@ type PackageSpec struct {
 // Parse parses a given package, looks for an interface and returns it as a normalized structure.
 func Parse(dir string, interfaceName string) (InterfaceSpec, error) {
 	cfg := &packages.Config{
-		Mode:  packages.LoadSyntax,
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedCompiledGoFiles |
+			packages.NeedImports |
+			packages.NeedDeps |
+			packages.NeedTypes |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo,
 		Tests: false,
 	}
 
@@ -76,7 +84,11 @@ func Parse(dir string, interfaceName string) (InterfaceSpec, error) {
 			sig := m.Type().(*types.Signature)
 
 			if sig.Params().Len() < 1 || sig.Params().Len() > 2 {
-				return spec, fmt.Errorf("dispatcher method %q can only have one or two parameters, but it has %d", m.Name(), sig.Params().Len())
+				return spec, fmt.Errorf(
+					"dispatcher method %q can only have one or two parameters, but it has %d",
+					m.Name(),
+					sig.Params().Len(),
+				)
 			}
 
 			firstParam := sig.Params().At(0)
@@ -108,7 +120,11 @@ func Parse(dir string, interfaceName string) (InterfaceSpec, error) {
 			}
 
 			if sig.Results().Len() > 1 {
-				return spec, fmt.Errorf("dispatcher method %q can only have one or zero return values, but it has %d", m.Name(), sig.Results().Len())
+				return spec, fmt.Errorf(
+					"dispatcher method %q can only have one or zero return values, but it has %d",
+					m.Name(),
+					sig.Results().Len(),
+				)
 			}
 
 			if sig.Results().Len() == 1 {
@@ -119,7 +135,11 @@ func Parse(dir string, interfaceName string) (InterfaceSpec, error) {
 				}
 
 				if resType.Obj().Name() != "error" {
-					return spec, fmt.Errorf("the return value in dispatcher method %q can only be error, but it is %q", m.Name(), resType.Obj().Name())
+					return spec, fmt.Errorf(
+						"the return value in dispatcher method %q can only be error, but it is %q",
+						m.Name(),
+						resType.Obj().Name(),
+					)
 				}
 
 				methodSpec.ReturnsError = true

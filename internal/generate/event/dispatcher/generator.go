@@ -118,7 +118,7 @@ func Generate(pkg string, spec InterfaceSpec) (string, error) {
 			))
 		}
 
-		fn = fn.Block(block...).Line()
+		fn.Block(block...).Line()
 	}
 
 	var buf bytes.Buffer
