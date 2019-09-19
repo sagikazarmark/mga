@@ -3,6 +3,7 @@ linters:
     disable:
         - maligned
         - funlen
+        - dupl
 
 linters-settings:
     golint:

@@ -14,6 +14,7 @@ func NewEventsCommand() *cobra.Command {
 
 	cmd.AddCommand(
 		NewDispatcherCommand(),
+		NewHandlerCommand(),
 	)
 
 	return cmd
