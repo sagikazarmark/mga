@@ -12,4 +12,4 @@ linters-settings:
         local-prefixes: sagikazarmark.dev/mga
 
 service:
-    golangci-lint-version: 1.18.x
+    golangci-lint-version: 1.19.x
