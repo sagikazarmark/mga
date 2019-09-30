@@ -100,7 +100,7 @@ func runHandler(options handlerOptions) error {
 	err = ioutil.WriteFile(
 		filepath.Join(
 			options.outdir,
-			fmt.Sprintf("%s_event_handler.go", spec.Name),
+			fmt.Sprintf("%s_event_handler_gen.go", spec.Name),
 		),
 		[]byte(res),
 		0644,

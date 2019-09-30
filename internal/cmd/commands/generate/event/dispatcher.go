@@ -113,7 +113,7 @@ func runDispatcher(options dispatcherOptions) error {
 	err = ioutil.WriteFile(
 		filepath.Join(
 			options.outdir,
-			fmt.Sprintf("%s_event_dispatcher.go", spec.Name),
+			fmt.Sprintf("%s_event_dispatcher_gen.go", spec.Name),
 		),
 		[]byte(res),
 		0644,
