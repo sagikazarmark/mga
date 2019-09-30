@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	emperror.dev/errors v0.4.3
-	github.com/ThreeDotsLabs/watermill v1.0.0-rc.3
+	github.com/ThreeDotsLabs/watermill v1.0.0
 	github.com/dave/jennifer v1.3.0
 	github.com/go-kit/kit v0.9.0
 	github.com/sagikazarmark/kitx v0.2.0
