@@ -1,15 +1,15 @@
+linters-settings:
+    golint:
+        min-confidence: 0.1
+    goimports:
+        local-prefixes: sagikazarmark.dev/mga
+
 linters:
     enable-all: true
     disable:
         - maligned
         - funlen
         - dupl
-
-linters-settings:
-    golint:
-        min-confidence: 0.1
-    goimports:
-        local-prefixes: sagikazarmark.dev/mga
 
 service:
     golangci-lint-version: 1.19.x
