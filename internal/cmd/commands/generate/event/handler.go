@@ -101,7 +101,7 @@ func runHandler(options handlerOptions) error {
 		return err
 	}
 
-	resFile := filepath.Join(options.outdir, fmt.Sprintf("%s_event_handler_gen.go", spec.Name))
+	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_handler_gen.go", spec.Name))
 
 	fmt.Printf("Generating event handler for %s in %s\n", spec.Name, resFile)
 
