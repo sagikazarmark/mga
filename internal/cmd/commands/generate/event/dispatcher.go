@@ -105,19 +105,16 @@ func runDispatcher(options dispatcherOptions) error {
 		return err
 	}
 
+	resFile := filepath.Join(options.outdir, fmt.Sprintf("%s_event_dispatcher_gen.go", spec.Name))
+
+	fmt.Printf("Generating event dispatcher for %s in %s\n", spec.Name, resFile)
+
 	res, err := dispatcher.Generate(outpkg, spec)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(
-		filepath.Join(
-			options.outdir,
-			fmt.Sprintf("%s_event_dispatcher_gen.go", spec.Name),
-		),
-		[]byte(res),
-		0644,
-	)
+	err = ioutil.WriteFile(resFile, []byte(res), 0644)
 	if err != nil {
 		return err
 	}

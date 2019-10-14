@@ -1,6 +1,7 @@
 package kit
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -96,19 +97,16 @@ func runEndpoint(options endpointOptions) error {
 		return err
 	}
 
+	resFile := filepath.Join(options.outdir, "endpoint_gen.go")
+
+	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
+
 	res, err := endpoint.Generate(outpkg, spec, options.withOc)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(
-		filepath.Join(
-			options.outdir,
-			"endpoint_gen.go",
-		),
-		[]byte(res),
-		0644,
-	)
+	err = ioutil.WriteFile(resFile, []byte(res), 0644)
 	if err != nil {
 		return err
 	}
