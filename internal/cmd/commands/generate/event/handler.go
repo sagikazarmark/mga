@@ -60,6 +60,7 @@ func runHandler(options handlerOptions) error {
 	}
 
 	var outpkg string
+	var absOutDir string
 
 	if options.outdir == "" {
 		cwd, err := os.Getwd()
@@ -69,11 +70,19 @@ func runHandler(options handlerOptions) error {
 
 		options.outdir = filepath.Base(cwd) + "gen"
 		outpkg = filepath.Base(options.outdir)
+
+		absOut, err := filepath.Abs(options.outdir)
+		if err != nil {
+			return err
+		}
+
+		absOutDir = absOut
 	} else {
 		absOut, err := filepath.Abs(options.outdir)
 		if err != nil {
 			return err
 		}
+		absOutDir = absOut
 
 		outpkg = filepath.Base(absOut)
 
@@ -87,7 +96,7 @@ func runHandler(options handlerOptions) error {
 		}
 	}
 
-	err = os.MkdirAll(options.outdir, 0755)
+	err = os.MkdirAll(absOutDir, 0755)
 	if err != nil {
 		return err
 	}
