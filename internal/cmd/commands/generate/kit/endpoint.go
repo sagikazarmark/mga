@@ -16,6 +16,7 @@ type endpointOptions struct {
 	outdir           string
 	outfile          string
 	withOc           bool
+	ocRoot           string
 }
 
 // NewEndpointCommand returns a cobra command for generating an endpoint.
@@ -54,6 +55,7 @@ where request and response types are any structures in the package.
 	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
 	flags.StringVar(&options.outfile, "outfile", "endpoint_gen.go", "output file within the output directory")
 	flags.BoolVar(&options.withOc, "with-oc", false, "generate OpenCensus tracing middleware")
+	flags.StringVar(&options.ocRoot, "oc-root", "", "override the package name in the generated OC trace middleware")
 
 	return cmd
 }
@@ -118,7 +120,7 @@ func runEndpoint(options endpointOptions) error {
 
 	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
 
-	res, err := endpoint.Generate(outpkg, spec, options.withOc)
+	res, err := endpoint.Generate(outpkg, spec, options.withOc, options.ocRoot)
 	if err != nil {
 		return err
 	}
