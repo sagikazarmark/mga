@@ -14,6 +14,7 @@ import (
 type endpointOptions struct {
 	serviceInterface string
 	outdir           string
+	outfile          string
 	withOc           bool
 }
 
@@ -51,6 +52,7 @@ where request and response types are any structures in the package.
 	flags := cmd.Flags()
 
 	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
+	flags.StringVar(&options.outfile, "outfile", "endpoint_gen.go", "output file within the output directory")
 	flags.BoolVar(&options.withOc, "with-oc", false, "generate OpenCensus tracing middleware")
 
 	return cmd
@@ -101,12 +103,18 @@ func runEndpoint(options endpointOptions) error {
 		}
 	}
 
+	if options.outfile == "" {
+		options.outfile = "endpoint_gen.go"
+	}
+
+	options.outfile = filepath.Base(options.outfile)
+
 	err = os.MkdirAll(absOutDir, 0755)
 	if err != nil {
 		return err
 	}
 
-	resFile := filepath.Join(absOutDir, "endpoint_gen.go")
+	resFile := filepath.Join(absOutDir, options.outfile)
 
 	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
 
