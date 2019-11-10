@@ -1,13 +1,16 @@
-// +build !gengo
+// +build gengo
 
 package endpoint
 
 import (
 	"errors"
 	"fmt"
-	"go/types"
+	"sort"
 
-	"golang.org/x/tools/go/packages"
+	"k8s.io/gengo/parser"
+	"k8s.io/gengo/types"
+
+	"sagikazarmark.dev/mga/internal/utils/packageutil"
 )
 
 // ServiceSpec describes the service interface.
@@ -31,48 +34,51 @@ type PackageSpec struct {
 
 // Parse parses a given package, looks for an interface and returns it as a normalized structure.
 func Parse(dir string, interfaceName string) (ServiceSpec, error) {
-	cfg := &packages.Config{
-		Mode: packages.NeedName |
-			packages.NeedFiles |
-			packages.NeedCompiledGoFiles |
-			packages.NeedImports |
-			packages.NeedDeps |
-			packages.NeedTypes |
-			packages.NeedTypesSizes |
-			packages.NeedSyntax |
-			packages.NeedTypesInfo,
-		Tests: false,
-	}
-
-	pkgs, err := packages.Load(cfg, dir)
+	pkgMap, err := packageutil.DirsToPackageMap(dir)
 	if err != nil {
 		return ServiceSpec{}, err
 	}
 
-	for _, pkg := range pkgs {
-		obj := pkg.Types.Scope().Lookup(interfaceName)
-		if obj == nil {
+	builder := parser.New()
+	if err := builder.AddDir(dir); err != nil {
+		return ServiceSpec{}, err
+	}
+
+	typs, err := builder.FindTypes()
+	if err != nil {
+		return ServiceSpec{}, err
+	}
+
+	for _, pkgName := range builder.FindPackages() {
+		pkg := typs[pkgName]
+
+		if !pkg.Has(interfaceName) {
 			continue
 		}
 
-		iface, ok := obj.Type().Underlying().(*types.Interface)
-		if !ok {
+		typ := pkg.Type(interfaceName)
+
+		if typ.Kind != types.Interface {
 			return ServiceSpec{}, fmt.Errorf("%q is not an interface", interfaceName)
 		}
 
 		spec := ServiceSpec{
 			Name: interfaceName,
 			Package: PackageSpec{
-				Name: obj.Pkg().Name(),
-				Path: obj.Pkg().Path(),
+				Name: pkg.Name,
+				Path: pkgMap[pkg.Name],
 			},
 		}
 
-		for i := 0; i < iface.NumMethods(); i++ {
-			m := iface.Method(i)
+		methodNames := make([]string, 0, len(typ.Methods))
+		for name := range typ.Methods {
+			methodNames = append(methodNames, name)
+		}
+		sort.Strings(methodNames)
 
+		for _, name := range methodNames {
 			endpointSpec := EndpointSpec{
-				Name: m.Name(),
+				Name: name,
 			}
 
 			spec.Endpoints = append(spec.Endpoints, endpointSpec)
