@@ -2,6 +2,8 @@ package endpoint
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerate(t *testing.T) {
@@ -64,9 +66,7 @@ func TraceEndpoints(endpoints Endpoints) Endpoints {
 }
 `
 
-	if res != expected {
-		t.Error("the generated code does not match the expected one")
-	}
+	assert.Equal(t, expected, res, "the generated code does not match the expected one")
 }
 
 func TestGenerate_WithOcRoot(t *testing.T) {
@@ -134,7 +134,5 @@ func TraceEndpoints(endpoints Endpoints) Endpoints {
 }
 `
 
-	if res != expected {
-		t.Error("the generated code does not match the expected one")
-	}
+	assert.Equal(t, expected, res, "the generated code does not match the expected one")
 }

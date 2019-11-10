@@ -2,6 +2,8 @@ package dispatcher
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerate(t *testing.T) {
@@ -104,7 +106,5 @@ func (d EventDispatcher) MarkedAsDone3(ctx context.Context, event todo.MarkedAsD
 }
 `
 
-	if res != expected {
-		t.Error("the generated code does not match the expected one")
-	}
+	assert.Equal(t, expected, res, "the generated code does not match the expected one")
 }

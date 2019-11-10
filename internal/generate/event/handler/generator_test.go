@@ -2,6 +2,8 @@ package handler
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerate(t *testing.T) {
@@ -69,7 +71,5 @@ func (h EventEventHandler) Handle(ctx context.Context, event interface{}) error 
 }
 `
 
-	if res != expected {
-		t.Error("the generated code does not match the expected one")
-	}
+	assert.Equal(t, expected, res, "the generated code does not match the expected one")
 }

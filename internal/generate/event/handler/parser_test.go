@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParse(t *testing.T) {
@@ -19,7 +20,5 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(expected, spec) {
-		t.Error("the parsed spec does not match the expected one")
-	}
+	assert.Equal(t, expected, spec, "the parsed spec does not match the expected one")
 }
