@@ -1,3 +1,5 @@
+// +build !gengo
+
 package handler
 
 import (
