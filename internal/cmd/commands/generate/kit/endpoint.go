@@ -15,6 +15,7 @@ type endpointOptions struct {
 	serviceInterface string
 	outdir           string
 	outfile          string
+	baseName         string
 	withOc           bool
 	ocRoot           string
 }
@@ -54,6 +55,7 @@ where request and response types are any structures in the package.
 
 	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
 	flags.StringVar(&options.outfile, "outfile", "endpoint_gen.go", "output file within the output directory")
+	flags.StringVar(&options.baseName, "base-name", "", "add a base name to generated structs (default: none)")
 	flags.BoolVar(&options.withOc, "with-oc", false, "generate OpenCensus tracing middleware")
 	flags.StringVar(&options.ocRoot, "oc-root", "", "override the package name in the generated OC trace middleware")
 
@@ -120,7 +122,7 @@ func runEndpoint(options endpointOptions) error {
 
 	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
 
-	res, err := endpoint.Generate(outpkg, spec, options.withOc, options.ocRoot)
+	res, err := endpoint.Generate(outpkg, spec, options.withOc, options.ocRoot, options.baseName)
 	if err != nil {
 		return err
 	}
