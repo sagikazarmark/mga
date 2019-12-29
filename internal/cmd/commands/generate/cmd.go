@@ -18,6 +18,7 @@ func NewGenerateCommand() *cobra.Command {
 	cmd.AddCommand(
 		event.NewEventsCommand(),
 		kit.NewKitCommand(),
+		NewMockeryCommand(),
 	)
 
 	return cmd

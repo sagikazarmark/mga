@@ -10,6 +10,7 @@ require (
 	github.com/sagikazarmark/kitx v0.2.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
+	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5
 	go.opencensus.io v0.22.1 // indirect
 	golang.org/x/tools v0.0.0-20190906115428-bc9f4f258ada
 )
