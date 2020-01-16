@@ -18,15 +18,7 @@ func Generate(pkg string, spec ServiceSpec, withOc bool, ocRoot string, baseName
 	file.ImportAlias("github.com/sagikazarmark/kitx/endpoint", "kitxendpoint")
 	file.ImportName(spec.Package.Path, spec.Package.Name)
 
-	endpoints := make([]jen.Code, 0, len(spec.Endpoints))
-	endpointDict := jen.Dict{}
-	for _, endpoint := range spec.Endpoints {
-		endpoints = append(endpoints, jen.Id(endpoint.Name).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
-		endpointDict[jen.Id(endpoint.Name)] = jen.Id("mw").Call(
-			jen.Id(fmt.Sprintf("Make%sEndpoint", endpoint.Name)).Call(jen.Id("service")),
-		)
-	}
-
+	endpointConstBaseName := "Endpoint"
 	endpointStructName := "Endpoints"
 	endpointFactoryName := "MakeEndpoints"
 	endpointTraceFactoryName := "TraceEndpoints"
@@ -37,10 +29,34 @@ func Generate(pkg string, spec ServiceSpec, withOc bool, ocRoot string, baseName
 			name += baseName[1:]
 		}
 
+		endpointConstBaseName = fmt.Sprintf("%sEndpoint", name)
 		endpointStructName = fmt.Sprintf("%sEndpoints", name)
 		endpointFactoryName = fmt.Sprintf("Make%sEndpoints", name)
 		endpointTraceFactoryName = fmt.Sprintf("Trace%sEndpoints", name)
 	}
+
+	endpoints := make([]jen.Code, 0, len(spec.Endpoints))
+	endpointDict := jen.Dict{}
+	endpointConsts := make([]jen.Code, 0, len(spec.Endpoints))
+	for _, endpoint := range spec.Endpoints {
+		endpoints = append(endpoints, jen.Id(endpoint.Name).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
+		endpointDict[jen.Id(endpoint.Name)] = jen.Qual("github.com/sagikazarmark/kitx/endpoint", "OperationNameMiddleware").
+			Call(jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName))).
+			Call(
+				jen.Id("mw").Call(
+					jen.Id(fmt.Sprintf("Make%sEndpoint", endpoint.Name)).Call(jen.Id("service")),
+				),
+			)
+		endpointConsts = append(
+			endpointConsts,
+			jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName)).
+				Op("=").
+				Lit(fmt.Sprintf("%s.%s", spec.Package.Name, endpoint.Name)),
+		)
+	}
+
+	file.Comment("Endpoint name constants")
+	file.Const().Defs(endpointConsts...)
 
 	file.Commentf("%s collects all of the endpoints that compose the underlying service. It's", endpointStructName)
 	file.Comment("meant to be used as a helper struct, to collect all of the endpoints into a")
@@ -58,7 +74,7 @@ func Generate(pkg string, spec ServiceSpec, withOc bool, ocRoot string, baseName
 		Block(
 			jen.Id("mw").
 				Op(":=").
-				Qual("github.com/sagikazarmark/kitx/endpoint", "Chain").
+				Qual("github.com/sagikazarmark/kitx/endpoint", "Combine").
 				Call(jen.Id("middleware").Op("...")),
 			jen.Line(),
 			jen.Return(
