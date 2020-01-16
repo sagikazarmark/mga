@@ -44,6 +44,12 @@ import (
 	"github.com/sagikazarmark/modern-go-application/internal/app/mga/todo"
 )
 
+// Endpoint name constants
+const (
+	CallEndpoint      = "todo.Call"
+	OtherCallEndpoint = "todo.OtherCall"
+)
+
 // Endpoints collects all of the endpoints that compose the underlying service. It's
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
@@ -55,11 +61,11 @@ type Endpoints struct {
 // MakeEndpoints returns a(n) Endpoints struct where each endpoint invokes
 // the corresponding method on the provided service.
 func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endpoints {
-	mw := kitxendpoint.Chain(middleware...)
+	mw := kitxendpoint.Combine(middleware...)
 
 	return Endpoints{
-		Call:      mw(MakeCallEndpoint(service)),
-		OtherCall: mw(MakeOtherCallEndpoint(service)),
+		Call:      kitxendpoint.OperationNameMiddleware(CallEndpoint)(mw(MakeCallEndpoint(service))),
+		OtherCall: kitxendpoint.OperationNameMiddleware(OtherCallEndpoint)(mw(MakeOtherCallEndpoint(service))),
 	}
 }
 
@@ -113,6 +119,12 @@ import (
 	"github.com/sagikazarmark/modern-go-application/internal/app/mga/todo"
 )
 
+// Endpoint name constants
+const (
+	CallEndpoint      = "todo.Call"
+	OtherCallEndpoint = "todo.OtherCall"
+)
+
 // Endpoints collects all of the endpoints that compose the underlying service. It's
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
@@ -124,11 +136,11 @@ type Endpoints struct {
 // MakeEndpoints returns a(n) Endpoints struct where each endpoint invokes
 // the corresponding method on the provided service.
 func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endpoints {
-	mw := kitxendpoint.Chain(middleware...)
+	mw := kitxendpoint.Combine(middleware...)
 
 	return Endpoints{
-		Call:      mw(MakeCallEndpoint(service)),
-		OtherCall: mw(MakeOtherCallEndpoint(service)),
+		Call:      kitxendpoint.OperationNameMiddleware(CallEndpoint)(mw(MakeCallEndpoint(service))),
+		OtherCall: kitxendpoint.OperationNameMiddleware(OtherCallEndpoint)(mw(MakeOtherCallEndpoint(service))),
 	}
 }
 
@@ -182,6 +194,12 @@ import (
 	"github.com/sagikazarmark/modern-go-application/internal/app/mga/todo"
 )
 
+// Endpoint name constants
+const (
+	CallTodoEndpoint      = "todo.Call"
+	OtherCallTodoEndpoint = "todo.OtherCall"
+)
+
 // TodoEndpoints collects all of the endpoints that compose the underlying service. It's
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
@@ -193,11 +211,11 @@ type TodoEndpoints struct {
 // MakeTodoEndpoints returns a(n) TodoEndpoints struct where each endpoint invokes
 // the corresponding method on the provided service.
 func MakeTodoEndpoints(service todo.Service, middleware ...endpoint.Middleware) TodoEndpoints {
-	mw := kitxendpoint.Chain(middleware...)
+	mw := kitxendpoint.Combine(middleware...)
 
 	return TodoEndpoints{
-		Call:      mw(MakeCallEndpoint(service)),
-		OtherCall: mw(MakeOtherCallEndpoint(service)),
+		Call:      kitxendpoint.OperationNameMiddleware(CallTodoEndpoint)(mw(MakeCallEndpoint(service))),
+		OtherCall: kitxendpoint.OperationNameMiddleware(OtherCallTodoEndpoint)(mw(MakeOtherCallEndpoint(service))),
 	}
 }
 
