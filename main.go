@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 
 	"sagikazarmark.dev/mga/internal/cmd/commands"
@@ -26,19 +27,26 @@ const (
 )
 
 func main() {
+	var noColor bool
+
 	// rootCmd represents the base command when called without any subcommands
 	rootCmd := &cobra.Command{
 		Use:     appName,
 		Short:   "CLI tool for Modern Go Application based apps",
 		Version: version,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			color.NoColor = noColor
+		},
 	}
 
 	rootCmd.SetVersionTemplate(fmt.Sprintf("%s version %s (%s) built on %s\n", appName, version, commitHash, buildDate))
 
+	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colorized output")
+
 	commands.AddCommands(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		rootCmd.PrintErrln(color.RedString(err.Error()))
 
 		os.Exit(1)
 	}
