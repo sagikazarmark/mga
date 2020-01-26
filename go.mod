@@ -18,4 +18,5 @@ require (
 	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/tools v0.0.0-20200116062425-473961ec044c
+	sigs.k8s.io/controller-tools v0.2.4
 )
