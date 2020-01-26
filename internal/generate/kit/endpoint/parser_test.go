@@ -5,71 +5,28 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 func TestParse(t *testing.T) {
-	tests := []struct {
-		serviceName        string
-		expectedDefinition PackageDefinition
-	}{
-		{
-			serviceName: "Service",
-			expectedDefinition: PackageDefinition{
-				HeaderText:  "",
-				PackageName: "parserdriver",
-				EndpointSets: []EndpointSetDefinition{
-					{
-						BaseName: "",
-						Service: ServiceDefinition{
-							Name:        "Service",
-							PackageName: "parser",
-							PackagePath: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
-						},
-						Endpoints: []EndpointDefinition{
-							{
-								Name:          "Call",
-								OperationName: "parser.Call",
-							},
-						},
-						WithOpenCensus: false,
-					},
-				},
+	expected := Service{
+		TypeRef: gentypes.TypeRef{
+			Name: "Service",
+			Package: gentypes.PackageRef{
+				Name: "parser",
+				Path: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
 			},
 		},
-		{
-			serviceName: "OtherService",
-			expectedDefinition: PackageDefinition{
-				HeaderText:  "",
-				PackageName: "parserdriver",
-				EndpointSets: []EndpointSetDefinition{
-					{
-						BaseName: "Other",
-						Service: ServiceDefinition{
-							Name:        "OtherService",
-							PackageName: "parser",
-							PackagePath: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
-						},
-						Endpoints: []EndpointDefinition{
-							{
-								Name:          "Call",
-								OperationName: "parser.Other.Call",
-							},
-						},
-						WithOpenCensus: false,
-					},
-				},
+		Methods: []ServiceMethod{
+			{
+				Name: "Call",
 			},
 		},
 	}
 
-	for _, test := range tests {
-		test := test
+	actual, err := Parse("./testdata/parser", "Service")
+	require.NoError(t, err)
 
-		t.Run(test.serviceName, func(t *testing.T) {
-			def, err := Parse("./testdata/parser", test.serviceName)
-			require.NoError(t, err)
-
-			assert.Equal(t, test.expectedDefinition, def, "the parsed definition does not match the expected one")
-		})
-	}
+	assert.Equal(t, expected, actual, "the parsed service does not match the expected one")
 }

@@ -4,29 +4,37 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 func TestGenerate(t *testing.T) {
 	tests := []struct {
 		name     string
-		def      PackageDefinition
+		def      File
 		expected string
 	}{
 		{
 			name: "Generate",
-			def: PackageDefinition{
-				HeaderText:  "",
-				PackageName: "tododriver",
-				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				EndpointSets: []EndpointSetDefinition{
+			def: File{
+				File: gentypes.File{
+					HeaderText: "",
+					Package: gentypes.PackageRef{
+						Name: "tododriver",
+						Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
+					},
+				},
+				EndpointSets: []EndpointSet{
 					{
-						BaseName: "",
-						Service: ServiceDefinition{
-							Name:        "Service",
-							PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
-							PackageName: "todo",
+						Name: "",
+						Service: gentypes.TypeRef{
+							Name: "Service",
+							Package: gentypes.PackageRef{
+								Name: "todo",
+								Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
+							},
 						},
-						Endpoints: []EndpointDefinition{
+						Endpoints: []Endpoint{
 							{
 								Name:          "Call",
 								OperationName: "todo.Call",
@@ -83,19 +91,25 @@ func TraceEndpoints(endpoints Endpoints) Endpoints {
 		},
 		{
 			name: "CustomOperationName",
-			def: PackageDefinition{
-				HeaderText:  "",
-				PackageName: "tododriver",
-				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				EndpointSets: []EndpointSetDefinition{
+			def: File{
+				File: gentypes.File{
+					HeaderText: "",
+					Package: gentypes.PackageRef{
+						Name: "tododriver",
+						Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
+					},
+				},
+				EndpointSets: []EndpointSet{
 					{
-						BaseName: "",
-						Service: ServiceDefinition{
-							Name:        "Service",
-							PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
-							PackageName: "todo",
+						Name: "",
+						Service: gentypes.TypeRef{
+							Name: "Service",
+							Package: gentypes.PackageRef{
+								Name: "todo",
+								Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
+							},
 						},
-						Endpoints: []EndpointDefinition{
+						Endpoints: []Endpoint{
 							{
 								Name:          "Call",
 								OperationName: "path/to/todo.Call",
@@ -143,19 +157,25 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 		},
 		{
 			name: "MultipleSets",
-			def: PackageDefinition{
-				HeaderText:  "",
-				PackageName: "tododriver",
-				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				EndpointSets: []EndpointSetDefinition{
+			def: File{
+				File: gentypes.File{
+					HeaderText: "",
+					Package: gentypes.PackageRef{
+						Name: "tododriver",
+						Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
+					},
+				},
+				EndpointSets: []EndpointSet{
 					{
-						BaseName: "",
-						Service: ServiceDefinition{
-							Name:        "Service",
-							PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
-							PackageName: "todo",
+						Name: "",
+						Service: gentypes.TypeRef{
+							Name: "Service",
+							Package: gentypes.PackageRef{
+								Name: "todo",
+								Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
+							},
 						},
-						Endpoints: []EndpointDefinition{
+						Endpoints: []Endpoint{
 							{
 								Name:          "Call",
 								OperationName: "todo.Call",
@@ -168,13 +188,15 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 						WithOpenCensus: false,
 					},
 					{
-						BaseName: "Other",
-						Service: ServiceDefinition{
-							Name:        "OtherService",
-							PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
-							PackageName: "todo",
+						Name: "Other",
+						Service: gentypes.TypeRef{
+							Name: "OtherService",
+							Package: gentypes.PackageRef{
+								Name: "todo",
+								Path: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo",
+							},
 						},
-						Endpoints: []EndpointDefinition{
+						Endpoints: []Endpoint{
 							{
 								Name:          "Call",
 								OperationName: "todo.Other.Call",

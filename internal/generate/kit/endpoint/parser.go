@@ -4,32 +4,27 @@ import (
 	"errors"
 	"fmt"
 	"go/types"
-	"strings"
 
 	"golang.org/x/tools/go/packages"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
-// ServiceSpec describes the service interface.
-type ServiceSpec struct {
-	Name      string
-	Package   PackageSpec
-	Endpoints []EndpointSpec
+// Service describes a service interface.
+type Service struct {
+	gentypes.TypeRef
+
+	// Methods is the list of methods in the service.
+	Methods []ServiceMethod
 }
 
-// EndpointSpec describes a dispatcher method in an event dispatcher.
-// nolint: golint
-type EndpointSpec struct {
+// ServiceMethod describes a method in a service.
+type ServiceMethod struct {
 	Name string
-}
-
-// PackageSpec contains import information.
-type PackageSpec struct {
-	Name string
-	Path string
 }
 
 // Parse parses a given package, looks for an interface and returns it as a normalized structure.
-func Parse(dir string, interfaceName string) (PackageDefinition, error) {
+func Parse(dir string, interfaceName string) (Service, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |
@@ -45,7 +40,7 @@ func Parse(dir string, interfaceName string) (PackageDefinition, error) {
 
 	pkgs, err := packages.Load(cfg, dir)
 	if err != nil {
-		return PackageDefinition{}, err
+		return Service{}, err
 	}
 
 	for _, pkg := range pkgs {
@@ -54,59 +49,43 @@ func Parse(dir string, interfaceName string) (PackageDefinition, error) {
 			continue
 		}
 
-		def := PackageDefinition{
-			HeaderText:   "",
-			PackageName:  pkg.Name + "driver",
-			EndpointSets: nil,
-		}
-
-		setDef, err := parseInterface(obj)
+		svc, err := parseInterface(obj)
 		if err != nil {
-			return def, err
+			return svc, err
 		}
 
-		def.EndpointSets = append(def.EndpointSets, setDef)
-
-		return def, nil
+		return svc, nil
 	}
 
-	return PackageDefinition{}, errors.New("interface not found")
+	return Service{}, errors.New("interface not found")
 }
 
-func parseInterface(obj types.Object) (EndpointSetDefinition, error) {
+func parseInterface(obj types.Object) (Service, error) {
 	iface, ok := obj.Type().Underlying().(*types.Interface)
 	if !ok {
-		return EndpointSetDefinition{}, fmt.Errorf("%q is not an interface", obj.Name())
+		return Service{}, fmt.Errorf("%q is not an interface", obj.Name())
 	}
 
-	def := EndpointSetDefinition{
-		BaseName: strings.TrimSuffix(obj.Name(), "Service"),
-		Service: ServiceDefinition{
-			Name:        obj.Name(),
-			PackageName: obj.Pkg().Name(),
-			PackagePath: obj.Pkg().Path(),
+	svc := Service{
+		TypeRef: gentypes.TypeRef{
+			Name: obj.Name(),
+			Package: gentypes.PackageRef{
+				Name: obj.Pkg().Name(),
+				Path: obj.Pkg().Path(),
+			},
 		},
-		Endpoints:      nil,
-		WithOpenCensus: false,
+		Methods: nil,
 	}
 
 	for i := 0; i < iface.NumMethods(); i++ {
 		m := iface.Method(i)
 
-		var opName string
-		if def.BaseName == "" {
-			opName = fmt.Sprintf("%s.%s", obj.Pkg().Name(), m.Name())
-		} else {
-			opName = fmt.Sprintf("%s.%s.%s", obj.Pkg().Name(), def.BaseName, m.Name())
+		endpointSpec := ServiceMethod{
+			Name: m.Name(),
 		}
 
-		endpointSpec := EndpointDefinition{
-			Name:          m.Name(),
-			OperationName: opName,
-		}
-
-		def.Endpoints = append(def.Endpoints, endpointSpec)
+		svc.Methods = append(svc.Methods, endpointSpec)
 	}
 
-	return def, nil
+	return svc, nil
 }
