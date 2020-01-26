@@ -40,33 +40,22 @@ func Generate(pkgDef PackageDefinition) ([]byte, error) {
 }
 
 func generateEndpointSet(file *jen.File, set EndpointSetDefinition) {
-	endpointConstBaseName := fmt.Sprintf("%sEndpoint", set.BaseName)
 	endpointStructName := fmt.Sprintf("%sEndpoints", set.BaseName)
 	endpointFactoryName := fmt.Sprintf("Make%sEndpoints", set.BaseName)
 	endpointTraceFactoryName := fmt.Sprintf("Trace%sEndpoints", set.BaseName)
 
 	endpoints := make([]jen.Code, 0, len(set.Endpoints))
 	endpointDict := jen.Dict{}
-	endpointConsts := make([]jen.Code, 0, len(set.Endpoints))
 	for _, endpoint := range set.Endpoints {
 		endpoints = append(endpoints, jen.Id(endpoint.Name).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
 		endpointDict[jen.Id(endpoint.Name)] = jen.Qual("github.com/sagikazarmark/kitx/endpoint", "OperationNameMiddleware").
-			Call(jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName))).
+			Call(jen.Lit(endpoint.OperationName)).
 			Call(
 				jen.Id("mw").Call(
 					jen.Id(fmt.Sprintf("Make%s%sEndpoint", endpoint.Name, set.BaseName)).Call(jen.Id("service")),
 				),
 			)
-		endpointConsts = append(
-			endpointConsts,
-			jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName)).
-				Op("=").
-				Lit(endpoint.OperationName),
-		)
 	}
-
-	file.Comment("Endpoint name constants")
-	file.Const().Defs(endpointConsts...)
 
 	file.Commentf("%s collects all of the endpoints that compose the underlying service. It's", endpointStructName)
 	file.Comment("meant to be used as a helper struct, to collect all of the endpoints into a")
@@ -101,7 +90,7 @@ func generateEndpointSet(file *jen.File, set EndpointSetDefinition) {
 				"github.com/go-kit/kit/tracing/opencensus",
 				"TraceEndpoint",
 			).
-				Call(jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName))).
+				Call(jen.Lit(endpoint.OperationName)).
 				Call(jen.Id("endpoints").Dot(endpoint.Name))
 		}
 
