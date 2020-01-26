@@ -113,7 +113,7 @@ func runEndpoint(options endpointOptions) error {
 	def.EndpointSets[0].WithOpenCensus = options.withOc
 
 	if options.ocRoot != "" {
-		def.LogicalName = options.ocRoot
+		// def.LogicalName = options.ocRoot
 	}
 
 	if options.outfile == "" {

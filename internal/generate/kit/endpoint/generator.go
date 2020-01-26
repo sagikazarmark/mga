@@ -26,7 +26,7 @@ func Generate(pkgDef PackageDefinition) ([]byte, error) {
 	for _, set := range pkgDef.EndpointSets {
 		file.ImportName(set.Service.PackagePath, set.Service.PackageName)
 
-		generateEndpointSet(file, pkgDef.LogicalName, set)
+		generateEndpointSet(file, set)
 	}
 
 	var buf bytes.Buffer
@@ -39,7 +39,7 @@ func Generate(pkgDef PackageDefinition) ([]byte, error) {
 	return format.Source(buf.Bytes())
 }
 
-func generateEndpointSet(file *jen.File, pkgName string, set SetDefinition) {
+func generateEndpointSet(file *jen.File, set EndpointSetDefinition) {
 	endpointConstBaseName := fmt.Sprintf("%sEndpoint", set.BaseName)
 	endpointStructName := fmt.Sprintf("%sEndpoints", set.BaseName)
 	endpointFactoryName := fmt.Sprintf("Make%sEndpoints", set.BaseName)
@@ -61,7 +61,7 @@ func generateEndpointSet(file *jen.File, pkgName string, set SetDefinition) {
 			endpointConsts,
 			jen.Id(fmt.Sprintf("%s%s", endpoint.Name, endpointConstBaseName)).
 				Op("=").
-				Lit(fmt.Sprintf("%s.%s", pkgName, endpoint.Name)),
+				Lit(endpoint.OperationName),
 		)
 	}
 

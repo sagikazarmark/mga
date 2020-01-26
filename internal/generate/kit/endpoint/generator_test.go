@@ -18,8 +18,7 @@ func TestGenerate(t *testing.T) {
 				HeaderText:  "",
 				PackageName: "tododriver",
 				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				LogicalName: "todo",
-				EndpointSets: []SetDefinition{
+				EndpointSets: []EndpointSetDefinition{
 					{
 						BaseName: "",
 						Service: ServiceDefinition{
@@ -29,10 +28,12 @@ func TestGenerate(t *testing.T) {
 						},
 						Endpoints: []EndpointDefinition{
 							{
-								Name: "Call",
+								Name:          "Call",
+								OperationName: "todo.Call",
 							},
 							{
-								Name: "OtherCall",
+								Name:          "OtherCall",
+								OperationName: "todo.OtherCall",
 							},
 						},
 						WithOpenCensus: true,
@@ -87,13 +88,12 @@ func TraceEndpoints(endpoints Endpoints) Endpoints {
 `,
 		},
 		{
-			name: "LogicalName",
+			name: "CustomOperationName",
 			def: PackageDefinition{
 				HeaderText:  "",
 				PackageName: "tododriver",
 				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				LogicalName: "path/to/todo",
-				EndpointSets: []SetDefinition{
+				EndpointSets: []EndpointSetDefinition{
 					{
 						BaseName: "",
 						Service: ServiceDefinition{
@@ -103,10 +103,12 @@ func TraceEndpoints(endpoints Endpoints) Endpoints {
 						},
 						Endpoints: []EndpointDefinition{
 							{
-								Name: "Call",
+								Name:          "Call",
+								OperationName: "path/to/todo.Call",
 							},
 							{
-								Name: "OtherCall",
+								Name:          "OtherCall",
+								OperationName: "path/to/todo.OtherCall",
 							},
 						},
 						WithOpenCensus: false,
@@ -157,8 +159,7 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 				HeaderText:  "",
 				PackageName: "tododriver",
 				PackagePath: "github.com/sagikazarmark/modern-go-application/internal/app/mga/todo/tododriver",
-				LogicalName: "todo",
-				EndpointSets: []SetDefinition{
+				EndpointSets: []EndpointSetDefinition{
 					{
 						BaseName: "",
 						Service: ServiceDefinition{
@@ -168,10 +169,12 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 						},
 						Endpoints: []EndpointDefinition{
 							{
-								Name: "Call",
+								Name:          "Call",
+								OperationName: "todo.Call",
 							},
 							{
-								Name: "OtherCall",
+								Name:          "OtherCall",
+								OperationName: "todo.OtherCall",
 							},
 						},
 						WithOpenCensus: false,
@@ -186,9 +189,11 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 						Endpoints: []EndpointDefinition{
 							{
 								Name: "Call",
+								OperationName: "todo.Other.Call",
 							},
 							{
 								Name: "OtherCall",
+								OperationName: "todo.Other.OtherCall",
 							},
 						},
 						WithOpenCensus: true,
@@ -235,8 +240,8 @@ func MakeEndpoints(service todo.Service, middleware ...endpoint.Middleware) Endp
 
 // Endpoint name constants
 const (
-	CallOtherEndpoint      = "todo.Call"
-	OtherCallOtherEndpoint = "todo.OtherCall"
+	CallOtherEndpoint      = "todo.Other.Call"
+	OtherCallOtherEndpoint = "todo.Other.OtherCall"
 )
 
 // OtherEndpoints collects all of the endpoints that compose the underlying service. It's

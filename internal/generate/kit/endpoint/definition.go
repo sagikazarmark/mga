@@ -14,18 +14,17 @@ type PackageDefinition struct {
 	// PackagePath is the path of the target Go package.
 	PackagePath string
 
-	// LogicalName combined with an endpoint name it creates an operation name to uniquely identify a service call.
-	LogicalName string
-
 	// EndpointSets represents endpoints to be generated for each service in the module.
-	EndpointSets []SetDefinition
+	EndpointSets []EndpointSetDefinition
 }
 
-// SetDefinition represents endpoints for a single service.
-type SetDefinition struct {
+// EndpointSetDefinition represents endpoints for a single service.
+// nolint: golint
+type EndpointSetDefinition struct {
 	// BaseName is a base name for the endpoint set.
 	BaseName string
 
+	// Service provides information about the service the endpoint set is generated for.
 	Service ServiceDefinition
 
 	// Endpoints is the list of endpoints represented by the set.
@@ -51,6 +50,8 @@ type ServiceDefinition struct {
 // nolint: golint
 type EndpointDefinition struct {
 	// Name identifies a call within a service.
-	// Combined with the module name it creates a unique operation name for the service call.
 	Name string
+
+	// OperationName uniquely identifies a service call.
+	OperationName string
 }

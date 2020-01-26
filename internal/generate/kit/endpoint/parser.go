@@ -56,8 +56,7 @@ func Parse(dir string, interfaceName string) (PackageDefinition, error) {
 
 		def := PackageDefinition{
 			HeaderText:   "",
-			PackageName:  pkg.Name+"driver",
-			LogicalName:  pkg.Name,
+			PackageName:  pkg.Name + "driver",
 			EndpointSets: nil,
 		}
 
@@ -74,13 +73,13 @@ func Parse(dir string, interfaceName string) (PackageDefinition, error) {
 	return PackageDefinition{}, errors.New("interface not found")
 }
 
-func parseInterface(obj types.Object) (SetDefinition, error) {
+func parseInterface(obj types.Object) (EndpointSetDefinition, error) {
 	iface, ok := obj.Type().Underlying().(*types.Interface)
 	if !ok {
-		return SetDefinition{}, fmt.Errorf("%q is not an interface", obj.Name())
+		return EndpointSetDefinition{}, fmt.Errorf("%q is not an interface", obj.Name())
 	}
 
-	def := SetDefinition{
+	def := EndpointSetDefinition{
 		BaseName: strings.TrimSuffix(obj.Name(), "Service"),
 		Service: ServiceDefinition{
 			Name:        obj.Name(),
@@ -94,8 +93,16 @@ func parseInterface(obj types.Object) (SetDefinition, error) {
 	for i := 0; i < iface.NumMethods(); i++ {
 		m := iface.Method(i)
 
+		var opName string
+		if def.BaseName == "" {
+			opName = fmt.Sprintf("%s.%s", obj.Pkg().Name(), m.Name())
+		} else {
+			opName = fmt.Sprintf("%s.%s.%s", obj.Pkg().Name(), def.BaseName, m.Name())
+		}
+
 		endpointSpec := EndpointDefinition{
-			Name: m.Name(),
+			Name:          m.Name(),
+			OperationName: opName,
 		}
 
 		def.Endpoints = append(def.Endpoints, endpointSpec)
