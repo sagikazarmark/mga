@@ -7,23 +7,32 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	spec, err := Parse("./testdata/parser", "Service")
+	def, err := Parse("./testdata/parser", "Service")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := ServiceSpec{
-		Name: "Service",
-		Package: PackageSpec{
-			Name: "parser",
-			Path: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
-		},
-		Endpoints: []EndpointSpec{
+	expected := PackageDefinition{
+		HeaderText:  "",
+		PackageName: "parserdriver",
+		LogicalName: "parser",
+		EndpointSets: []SetDefinition{
 			{
-				Name: "Call",
+				BaseName: "",
+				Service: ServiceDefinition{
+					Name:        "Service",
+					PackageName: "parser",
+					PackagePath: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
+				},
+				Endpoints: []EndpointDefinition{
+					{
+						Name: "Call",
+					},
+				},
+				WithOpenCensus: false,
 			},
 		},
 	}
 
-	assert.Equal(t, expected, spec, "the parsed spec does not match the expected one")
+	assert.Equal(t, expected, def, "the parsed definition does not match the expected one")
 }

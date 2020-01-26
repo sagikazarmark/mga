@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go/types"
+	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -28,7 +29,7 @@ type PackageSpec struct {
 }
 
 // Parse parses a given package, looks for an interface and returns it as a normalized structure.
-func Parse(dir string, interfaceName string) (ServiceSpec, error) {
+func Parse(dir string, interfaceName string) (PackageDefinition, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |
@@ -44,7 +45,7 @@ func Parse(dir string, interfaceName string) (ServiceSpec, error) {
 
 	pkgs, err := packages.Load(cfg, dir)
 	if err != nil {
-		return ServiceSpec{}, err
+		return PackageDefinition{}, err
 	}
 
 	for _, pkg := range pkgs {
@@ -53,31 +54,52 @@ func Parse(dir string, interfaceName string) (ServiceSpec, error) {
 			continue
 		}
 
-		iface, ok := obj.Type().Underlying().(*types.Interface)
-		if !ok {
-			return ServiceSpec{}, fmt.Errorf("%q is not an interface", interfaceName)
+		def := PackageDefinition{
+			HeaderText:   "",
+			PackageName:  pkg.Name+"driver",
+			LogicalName:  pkg.Name,
+			EndpointSets: nil,
 		}
 
-		spec := ServiceSpec{
-			Name: interfaceName,
-			Package: PackageSpec{
-				Name: obj.Pkg().Name(),
-				Path: obj.Pkg().Path(),
-			},
+		setDef, err := parseInterface(obj)
+		if err != nil {
+			return def, err
 		}
 
-		for i := 0; i < iface.NumMethods(); i++ {
-			m := iface.Method(i)
+		def.EndpointSets = append(def.EndpointSets, setDef)
 
-			endpointSpec := EndpointSpec{
-				Name: m.Name(),
-			}
-
-			spec.Endpoints = append(spec.Endpoints, endpointSpec)
-		}
-
-		return spec, nil
+		return def, nil
 	}
 
-	return ServiceSpec{}, errors.New("interface not found")
+	return PackageDefinition{}, errors.New("interface not found")
+}
+
+func parseInterface(obj types.Object) (SetDefinition, error) {
+	iface, ok := obj.Type().Underlying().(*types.Interface)
+	if !ok {
+		return SetDefinition{}, fmt.Errorf("%q is not an interface", obj.Name())
+	}
+
+	def := SetDefinition{
+		BaseName: strings.TrimSuffix(obj.Name(), "Service"),
+		Service: ServiceDefinition{
+			Name:        obj.Name(),
+			PackageName: obj.Pkg().Name(),
+			PackagePath: obj.Pkg().Path(),
+		},
+		Endpoints:      nil,
+		WithOpenCensus: false,
+	}
+
+	for i := 0; i < iface.NumMethods(); i++ {
+		m := iface.Method(i)
+
+		endpointSpec := EndpointDefinition{
+			Name: m.Name(),
+		}
+
+		def.Endpoints = append(def.Endpoints, endpointSpec)
+	}
+
+	return def, nil
 }

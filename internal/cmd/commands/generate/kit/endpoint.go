@@ -65,7 +65,7 @@ where request and response types are any structures in the package.
 func runEndpoint(options endpointOptions) error {
 	indir := "."
 
-	spec, err := endpoint.Parse(indir, options.serviceInterface)
+	def, err := endpoint.Parse(indir, options.serviceInterface)
 	if err != nil {
 		return err
 	}
@@ -103,8 +103,17 @@ func runEndpoint(options endpointOptions) error {
 		}
 
 		if absIn == absOut { // When the input and the output directories are the same
-			outpkg = spec.Package.Path
+			outpkg = def.EndpointSets[0].Service.PackageName
+			def.PackagePath = def.EndpointSets[0].Service.PackagePath
 		}
+	}
+
+	def.PackageName = outpkg
+	def.EndpointSets[0].BaseName = options.baseName
+	def.EndpointSets[0].WithOpenCensus = options.withOc
+
+	if options.ocRoot != "" {
+		def.LogicalName = options.ocRoot
 	}
 
 	if options.outfile == "" {
@@ -120,14 +129,14 @@ func runEndpoint(options endpointOptions) error {
 
 	resFile := filepath.Join(absOutDir, options.outfile)
 
-	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
+	fmt.Printf("Generating Go kit endpoints for %s in %s\n", def.EndpointSets[0].Service.Name, resFile)
 
-	res, err := endpoint.Generate(outpkg, spec, options.withOc, options.ocRoot, options.baseName)
+	res, err := endpoint.Generate(def)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(resFile, []byte(res), 0644)
+	err = ioutil.WriteFile(resFile, res, 0644)
 	if err != nil {
 		return err
 	}
