@@ -54,6 +54,7 @@ endif
 .PHONY: generate
 generate: ## Generate test code
 	go generate -run "go run sagikazarmark.dev/mga generate" ./...
+	go run sagikazarmark.dev/mga generate kit endpoint ./...
 
 .PHONY: check
 check: test-all lint ## Run tests and linters
