@@ -6,29 +6,25 @@ import (
 	"go/types"
 
 	"golang.org/x/tools/go/packages"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
-// ServiceSpec describes the service interface.
-type ServiceSpec struct {
-	Name      string
-	Package   PackageSpec
-	Endpoints []EndpointSpec
+// Service describes a service interface.
+type Service struct {
+	gentypes.TypeRef
+
+	// Methods is the list of methods in the service.
+	Methods []ServiceMethod
 }
 
-// EndpointSpec describes a dispatcher method in an event dispatcher.
-// nolint: golint
-type EndpointSpec struct {
+// ServiceMethod describes a method in a service.
+type ServiceMethod struct {
 	Name string
-}
-
-// PackageSpec contains import information.
-type PackageSpec struct {
-	Name string
-	Path string
 }
 
 // Parse parses a given package, looks for an interface and returns it as a normalized structure.
-func Parse(dir string, interfaceName string) (ServiceSpec, error) {
+func Parse(dir string, interfaceName string) (Service, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |
@@ -44,7 +40,7 @@ func Parse(dir string, interfaceName string) (ServiceSpec, error) {
 
 	pkgs, err := packages.Load(cfg, dir)
 	if err != nil {
-		return ServiceSpec{}, err
+		return Service{}, err
 	}
 
 	for _, pkg := range pkgs {
@@ -53,31 +49,43 @@ func Parse(dir string, interfaceName string) (ServiceSpec, error) {
 			continue
 		}
 
-		iface, ok := obj.Type().Underlying().(*types.Interface)
-		if !ok {
-			return ServiceSpec{}, fmt.Errorf("%q is not an interface", interfaceName)
+		svc, err := parseInterface(obj)
+		if err != nil {
+			return svc, err
 		}
 
-		spec := ServiceSpec{
-			Name: interfaceName,
-			Package: PackageSpec{
+		return svc, nil
+	}
+
+	return Service{}, errors.New("interface not found")
+}
+
+func parseInterface(obj types.Object) (Service, error) {
+	iface, ok := obj.Type().Underlying().(*types.Interface)
+	if !ok {
+		return Service{}, fmt.Errorf("%q is not an interface", obj.Name())
+	}
+
+	svc := Service{
+		TypeRef: gentypes.TypeRef{
+			Name: obj.Name(),
+			Package: gentypes.PackageRef{
 				Name: obj.Pkg().Name(),
 				Path: obj.Pkg().Path(),
 			},
-		}
-
-		for i := 0; i < iface.NumMethods(); i++ {
-			m := iface.Method(i)
-
-			endpointSpec := EndpointSpec{
-				Name: m.Name(),
-			}
-
-			spec.Endpoints = append(spec.Endpoints, endpointSpec)
-		}
-
-		return spec, nil
+		},
+		Methods: nil,
 	}
 
-	return ServiceSpec{}, errors.New("interface not found")
+	for i := 0; i < iface.NumMethods(); i++ {
+		m := iface.Method(i)
+
+		endpointSpec := ServiceMethod{
+			Name: m.Name(),
+		}
+
+		svc.Methods = append(svc.Methods, endpointSpec)
+	}
+
+	return svc, nil
 }

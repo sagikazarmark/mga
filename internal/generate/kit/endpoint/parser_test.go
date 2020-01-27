@@ -4,26 +4,29 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 func TestParse(t *testing.T) {
-	spec, err := Parse("./testdata/parser", "Service")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected := ServiceSpec{
-		Name: "Service",
-		Package: PackageSpec{
-			Name: "parser",
-			Path: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
+	expected := Service{
+		TypeRef: gentypes.TypeRef{
+			Name: "Service",
+			Package: gentypes.PackageRef{
+				Name: "parser",
+				Path: "sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/parser",
+			},
 		},
-		Endpoints: []EndpointSpec{
+		Methods: []ServiceMethod{
 			{
 				Name: "Call",
 			},
 		},
 	}
 
-	assert.Equal(t, expected, spec, "the parsed spec does not match the expected one")
+	actual, err := Parse("./testdata/parser", "Service")
+	require.NoError(t, err)
+
+	assert.Equal(t, expected, actual, "the parsed service does not match the expected one")
 }

@@ -6,22 +6,15 @@ import (
 	"go/types"
 
 	"golang.org/x/tools/go/packages"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
-// EventSpec describes the event struct.
-type EventSpec struct {
-	Name    string
-	Package PackageSpec
-}
-
-// PackageSpec contains import information.
-type PackageSpec struct {
-	Name string
-	Path string
-}
+// Event describes an event struct.
+type Event = gentypes.TypeRef
 
 // Parse parses a given package, looks for a struct and returns it as a normalized structure.
-func Parse(dir string, eventName string) (EventSpec, error) {
+func Parse(dir string, eventName string) (Event, error) {
 	cfg := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |
@@ -37,7 +30,7 @@ func Parse(dir string, eventName string) (EventSpec, error) {
 
 	pkgs, err := packages.Load(cfg, dir)
 	if err != nil {
-		return EventSpec{}, err
+		return Event{}, err
 	}
 
 	for _, pkg := range pkgs {
@@ -48,19 +41,19 @@ func Parse(dir string, eventName string) (EventSpec, error) {
 
 		_, ok := obj.Type().Underlying().(*types.Struct)
 		if !ok {
-			return EventSpec{}, fmt.Errorf("%q is not a struct", eventName)
+			return Event{}, fmt.Errorf("%q is not a struct", eventName)
 		}
 
-		spec := EventSpec{
+		event := Event{
 			Name: eventName,
-			Package: PackageSpec{
+			Package: gentypes.PackageRef{
 				Name: obj.Pkg().Name(),
 				Path: obj.Pkg().Path(),
 			},
 		}
 
-		return spec, nil
+		return event, nil
 	}
 
-	return EventSpec{}, errors.New("event not found")
+	return Event{}, errors.New("event not found")
 }

@@ -1,24 +1,16 @@
 package test
 
 import (
-	"context"
-
 	"github.com/go-kit/kit/endpoint"
 )
 
-func MakeCallEndpoint(service Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return nil, nil
-	}
+func MakeCallEndpoint(_ Service) endpoint.Endpoint {
+	return endpoint.Nop
 }
-func MakeOtherCallEndpoint(service Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return nil, nil
-	}
+func MakeOtherCallEndpoint(_ Service) endpoint.Endpoint {
+	return endpoint.Nop
 }
 
-func MakeAnotherCallEndpoint(service Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		return nil, nil
-	}
+func MakeAnotherCallEndpoint(_ Service) endpoint.Endpoint {
+	return endpoint.Nop
 }

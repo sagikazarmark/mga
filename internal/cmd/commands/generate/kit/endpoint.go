@@ -5,9 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
 )
 
@@ -65,12 +67,12 @@ where request and response types are any structures in the package.
 func runEndpoint(options endpointOptions) error {
 	indir := "."
 
-	spec, err := endpoint.Parse(indir, options.serviceInterface)
+	svc, err := endpoint.Parse(indir, options.serviceInterface)
 	if err != nil {
 		return err
 	}
 
-	var outpkg string
+	var packageRef gentypes.PackageRef
 	var absOutDir string
 
 	if options.outdir == "" {
@@ -80,7 +82,7 @@ func runEndpoint(options endpointOptions) error {
 		}
 
 		options.outdir = filepath.Base(cwd) + "gen"
-		outpkg = filepath.Base(options.outdir)
+		packageRef.Name = filepath.Base(options.outdir)
 
 		absOut, err := filepath.Abs(options.outdir)
 		if err != nil {
@@ -95,7 +97,7 @@ func runEndpoint(options endpointOptions) error {
 		}
 		absOutDir = absOut
 
-		outpkg = filepath.Base(absOut)
+		packageRef.Name = filepath.Base(absOut)
 
 		absIn, err := filepath.Abs(indir)
 		if err != nil {
@@ -103,7 +105,7 @@ func runEndpoint(options endpointOptions) error {
 		}
 
 		if absIn == absOut { // When the input and the output directories are the same
-			outpkg = spec.Package.Path
+			packageRef = svc.Package
 		}
 	}
 
@@ -120,14 +122,53 @@ func runEndpoint(options endpointOptions) error {
 
 	resFile := filepath.Join(absOutDir, options.outfile)
 
-	fmt.Printf("Generating Go kit endpoints for %s in %s\n", spec.Name, resFile)
+	file := endpoint.File{
+		File: gentypes.File{
+			Package:    packageRef,
+			HeaderText: "",
+		},
+		EndpointSets: []endpoint.EndpointSet{
+			{
+				Name:           strings.TrimSuffix(svc.Name, "Service"),
+				Service:        svc.TypeRef,
+				Endpoints:      nil,
+				WithOpenCensus: options.withOc,
+			},
+		},
+	}
 
-	res, err := endpoint.Generate(outpkg, spec, options.withOc, options.ocRoot, options.baseName)
+	operationNameRoot := svc.Package.Name
+	if options.ocRoot != "" {
+		operationNameRoot = options.ocRoot
+	}
+
+	for _, method := range svc.Methods {
+		var operationName string
+
+		// if endpoint set name is empty, do not add it to the operation name
+		if file.EndpointSets[0].Name == "" {
+			operationName = fmt.Sprintf("%s.%s", operationNameRoot, method.Name)
+		} else {
+			operationName = fmt.Sprintf("%s.%s.%s", operationNameRoot, file.EndpointSets[0].Name, method.Name)
+		}
+
+		file.EndpointSets[0].Endpoints = append(
+			file.EndpointSets[0].Endpoints,
+			endpoint.Endpoint{
+				Name:          method.Name,
+				OperationName: operationName,
+			},
+		)
+	}
+
+	fmt.Printf("Generating Go kit endpoints for %s in %s\n", file.EndpointSets[0].Service.Name, resFile)
+
+	res, err := endpoint.Generate(file)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(resFile, []byte(res), 0644)
+	err = ioutil.WriteFile(resFile, res, 0644)
 	if err != nil {
 		return err
 	}

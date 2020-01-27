@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"sagikazarmark.dev/mga/internal/generate/event/handler"
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 type handlerOptions struct {
@@ -54,12 +55,12 @@ The generated handler is compatible with Watermill (https://github.com/ThreeDots
 func runHandler(options handlerOptions) error {
 	indir := "."
 
-	spec, err := handler.Parse(indir, options.event)
+	event, err := handler.Parse(indir, options.event)
 	if err != nil {
 		return err
 	}
 
-	var outpkg string
+	var packageRef gentypes.PackageRef
 	var absOutDir string
 
 	if options.outdir == "" {
@@ -69,7 +70,7 @@ func runHandler(options handlerOptions) error {
 		}
 
 		options.outdir = filepath.Base(cwd) + "gen"
-		outpkg = filepath.Base(options.outdir)
+		packageRef.Name = filepath.Base(options.outdir)
 
 		absOut, err := filepath.Abs(options.outdir)
 		if err != nil {
@@ -84,7 +85,7 @@ func runHandler(options handlerOptions) error {
 		}
 		absOutDir = absOut
 
-		outpkg = filepath.Base(absOut)
+		packageRef.Name = filepath.Base(absOut)
 
 		absIn, err := filepath.Abs(indir)
 		if err != nil {
@@ -92,7 +93,7 @@ func runHandler(options handlerOptions) error {
 		}
 
 		if absIn == absOut { // When the input and the output directories are the same
-			outpkg = spec.Package.Path
+			packageRef = event.Package
 		}
 	}
 
@@ -101,16 +102,29 @@ func runHandler(options handlerOptions) error {
 		return err
 	}
 
-	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_handler_gen.go", spec.Name))
+	file := handler.File{
+		File: gentypes.File{
+			Package:    packageRef,
+			HeaderText: "",
+		},
+		EventHandlers: []handler.EventHandler{
+			{
+				Name:  event.Name,
+				Event: event,
+			},
+		},
+	}
 
-	fmt.Printf("Generating event handler for %s in %s\n", spec.Name, resFile)
+	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_handler_gen.go", event.Name))
 
-	res, err := handler.Generate(outpkg, spec)
+	fmt.Printf("Generating event handler for %s in %s\n", event.Name, resFile)
+
+	res, err := handler.Generate(file)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(resFile, []byte(res), 0644)
+	err = ioutil.WriteFile(resFile, res, 0644)
 	if err != nil {
 		return err
 	}
