@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"sagikazarmark.dev/mga/internal/generate/event/dispatcher"
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 type dispatcherOptions struct {
@@ -67,12 +69,12 @@ but interface methods cannot accept or return more or different parameters.
 func runDispatcher(options dispatcherOptions) error {
 	indir := "."
 
-	spec, err := dispatcher.Parse(indir, options.baseInterface)
+	events, err := dispatcher.Parse(indir, options.baseInterface)
 	if err != nil {
 		return err
 	}
 
-	var outpkg string
+	var packageRef gentypes.PackageRef
 	var absOutDir string
 
 	if options.outdir == "" {
@@ -82,7 +84,7 @@ func runDispatcher(options dispatcherOptions) error {
 		}
 
 		options.outdir = filepath.Base(cwd) + "gen"
-		outpkg = filepath.Base(options.outdir)
+		packageRef.Name = filepath.Base(options.outdir)
 
 		absOut, err := filepath.Abs(options.outdir)
 		if err != nil {
@@ -97,7 +99,7 @@ func runDispatcher(options dispatcherOptions) error {
 		}
 		absOutDir = absOut
 
-		outpkg = filepath.Base(absOut)
+		packageRef.Name = filepath.Base(absOut)
 
 		absIn, err := filepath.Abs(indir)
 		if err != nil {
@@ -105,7 +107,7 @@ func runDispatcher(options dispatcherOptions) error {
 		}
 
 		if absIn == absOut { // When the input and the output directories are the same
-			outpkg = spec.Package.Path
+			packageRef = events.Package
 		}
 	}
 
@@ -114,19 +116,40 @@ func runDispatcher(options dispatcherOptions) error {
 		return err
 	}
 
-	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_dispatcher_gen.go", spec.Name))
+	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_dispatcher_gen.go", events.Name))
 
-	fmt.Printf("Generating event dispatcher for %s in %s\n", spec.Name, resFile)
+	file := dispatcher.File{
+		File: gentypes.File{
+			Package:    packageRef,
+			HeaderText: "",
+		},
+		EventDispatchers: []dispatcher.EventDispatcher{
+			{
+				Name:              cleanEventDispatcherName(events.Name),
+				DispatcherMethods: events.Methods,
+			},
+		},
+	}
 
-	res, err := dispatcher.Generate(outpkg, spec)
+	fmt.Printf("Generating event dispatcher for %s in %s\n", events.Name, resFile)
+
+	res, err := dispatcher.Generate(file)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(resFile, []byte(res), 0644)
+	err = ioutil.WriteFile(resFile, res, 0644)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func cleanEventDispatcherName(name string) string {
+	name = strings.TrimSuffix(name, "Events")
+	name = strings.TrimSuffix(name, "EventBus")
+	name = strings.TrimSuffix(name, "EventDispatcher")
+
+	return name
 }

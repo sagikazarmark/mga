@@ -4,26 +4,26 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"sagikazarmark.dev/mga/internal/generate/gentypes"
 )
 
 func TestParse(t *testing.T) {
-	spec, err := Parse("./testdata/parser", "Events")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expected := InterfaceSpec{
-		Name: "Events",
-		Package: PackageSpec{
-			Name: "parser",
-			Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+	expected := Events{
+		TypeRef: gentypes.TypeRef{
+			Name: "Events",
+			Package: gentypes.PackageRef{
+				Name: "parser",
+				Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
+			},
 		},
-		Methods: []MethodSpec{
+		Methods: []EventMethod{
 			{
 				Name: "Event",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -33,9 +33,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "EventEmbedded",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -45,9 +45,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "EventEmbeddedFromUnexportedInterface",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -57,9 +57,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "EventWithContext",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -69,9 +69,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "EventWithContextAndError",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -81,9 +81,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "EventWithError",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "Event",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "parser",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser",
 					},
@@ -93,9 +93,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "ImportedAliasedEvent",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "ImportedEvent",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "imports",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
 					},
@@ -105,9 +105,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "ImportedEvent",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "ImportedEvent",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "imports",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
 					},
@@ -117,9 +117,9 @@ func TestParse(t *testing.T) {
 			},
 			{
 				Name: "ImportedEventDispatch",
-				Event: TypeSpec{
+				Event: gentypes.TypeRef{
 					Name: "ImportedEvent",
-					Package: PackageSpec{
+					Package: gentypes.PackageRef{
 						Name: "imports",
 						Path: "sagikazarmark.dev/mga/internal/generate/event/dispatcher/testdata/parser/imports",
 					},
@@ -130,5 +130,8 @@ func TestParse(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, expected, spec, "the parsed spec does not match the expected one")
+	evdisp, err := Parse("./testdata/parser", "Events")
+	require.NoError(t, err)
+
+	assert.Equal(t, expected, evdisp, "the parsed interface does not match the expected one")
 }
