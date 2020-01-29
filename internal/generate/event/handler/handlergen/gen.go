@@ -1,4 +1,4 @@
-package endpointgen
+package handlergen
 
 import (
 	"fmt"
@@ -11,32 +11,14 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/loader"
 	"sigs.k8s.io/controller-tools/pkg/markers"
 
+	"sagikazarmark.dev/mga/internal/generate/event/handler"
 	"sagikazarmark.dev/mga/internal/generate/gentypes"
-	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
 )
 
 // nolint: gochecknoglobals
 var (
-	endpointMarker = markers.Must(markers.MakeDefinition("kit:endpoint", markers.DescribesType, Marker{}))
+	handlerMarker = markers.Must(markers.MakeDefinition("mga:event:handler", markers.DescribesType, struct{}{}))
 )
-
-// +controllertools:marker:generateHelp:category=Kit
-
-// Marker enables generating an endpoint for a service and provides information to the generator.
-type Marker struct {
-	// BaseName specifies a base name for the service (other than the one automatically generated).
-	//
-	// When not specified falls back to base name created from the service name.
-	BaseName string `marker:"baseName,optional"`
-
-	// ModuleName can be used instead of the package name as an operation name to uniquely identify a service call.
-	//
-	// Falls back to the package name.
-	ModuleName string `marker:"moduleName,optional"`
-
-	// WithOpenCensus enables generating a TraceEndpoint middleware.
-	WithOpenCensus bool `marker:"withOpenCensus,optional"`
-}
 
 // Generator generates a Go kit Endpoint for a service.
 type Generator struct {
@@ -48,13 +30,13 @@ type Generator struct {
 }
 
 func (g Generator) RegisterMarkers(into *markers.Registry) error {
-	if err := into.Register(endpointMarker); err != nil {
+	if err := into.Register(handlerMarker); err != nil {
 		return err
 	}
 
 	into.AddHelp(
-		endpointMarker,
-		markers.SimpleHelp("Kit", "enables endpoint generation for a service interface"),
+		handlerMarker,
+		markers.SimpleHelp("Kit", "enables event handler generation for an event"),
 	)
 
 	return nil
@@ -89,18 +71,17 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText string, root *loader.Package) []byte {
 	ctx.Checker.Check(root, func(node ast.Node) bool {
 		// ignore non-interfaces
-		_, isIface := node.(*ast.InterfaceType)
+		_, isStruct := node.(*ast.StructType)
 
-		return isIface
+		return isStruct
 	})
 
 	root.NeedTypesInfo()
 
-	var endpointSets []endpoint.EndpointSet
+	var eventHandlers []handler.EventHandler
 
 	err := markers.EachType(ctx.Collector, root, func(info *markers.TypeInfo) {
-		marker, ok := info.Markers.Get(endpointMarker.Name).(Marker)
-		if !ok {
+		if marker := info.Markers.Get(handlerMarker.Name); marker == nil {
 			return
 		}
 
@@ -111,14 +92,14 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			return
 		}
 
-		svc, err := endpoint.ParseInterface(root.TypesInfo.ObjectOf(info.RawSpec.Name))
+		event, err := handler.ParseEvent(root.TypesInfo.ObjectOf(info.RawSpec.Name))
 		if err != nil {
 			root.AddError(err)
 
 			return
 		}
 
-		endpointSets = append(endpointSets, endpoint.EndpointSetFromService(svc, endpoint.GeneratorOptions(marker)))
+		eventHandlers = append(eventHandlers, handler.EventHandlerFromEvent(event))
 	})
 	if err != nil {
 		root.AddError(err)
@@ -126,22 +107,22 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		return nil
 	}
 
-	if len(endpointSets) == 0 {
+	if len(eventHandlers) == 0 {
 		return nil
 	}
 
-	file := endpoint.File{
+	file := handler.File{
 		File: gentypes.File{
 			Package: gentypes.PackageRef{
-				Name: root.Name + "driver",
-				Path: root.PkgPath + "/" + root.Name + "driver",
+				Name: root.Name + "gen",
+				Path: root.PkgPath + "/" + root.Name + "gen",
 			},
 			HeaderText: headerText,
 		},
-		EndpointSets: endpointSets,
+		EventHandlers: eventHandlers,
 	}
 
-	outContents, err := endpoint.Generate(file)
+	outContents, err := handler.Generate(file)
 	if err != nil {
 		root.AddError(err)
 
@@ -153,7 +134,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 
 // writeOut outputs the given code.
 func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []byte) {
-	outputFile, err := ctx.Open(root, fmt.Sprintf("%sdriver/zz_generated.endpoint.go", root.Name))
+	outputFile, err := ctx.Open(root, fmt.Sprintf("%sgen/zz_generated.event_handler.go", root.Name))
 	if err != nil {
 		root.AddError(err)
 		return

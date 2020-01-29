@@ -39,21 +39,26 @@ func Parse(dir string, eventName string) (Event, error) {
 			continue
 		}
 
-		_, ok := obj.Type().Underlying().(*types.Struct)
-		if !ok {
-			return Event{}, fmt.Errorf("%q is not a struct", eventName)
-		}
-
-		event := Event{
-			Name: eventName,
-			Package: gentypes.PackageRef{
-				Name: obj.Pkg().Name(),
-				Path: obj.Pkg().Path(),
-			},
-		}
-
-		return event, nil
+		return ParseEvent(obj)
 	}
 
 	return Event{}, errors.New("event not found")
+}
+
+// ParseEvent parses an object as an event.
+func ParseEvent(obj types.Object) (Event, error) {
+	_, ok := obj.Type().Underlying().(*types.Struct)
+	if !ok {
+		return Event{}, fmt.Errorf("%q is not a struct", obj.Name())
+	}
+
+	event := Event{
+		Name: obj.Name(),
+		Package: gentypes.PackageRef{
+			Name: obj.Pkg().Name(),
+			Path: obj.Pkg().Path(),
+		},
+	}
+
+	return event, nil
 }
