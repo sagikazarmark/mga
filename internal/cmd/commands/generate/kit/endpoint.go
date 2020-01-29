@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/controller-tools/pkg/genall"
 
-	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
+	"sagikazarmark.dev/mga/internal/generate/kit/endpoint/endpointgen"
 	"sagikazarmark.dev/mga/pkg/genutils"
 )
 
@@ -57,7 +57,7 @@ where request and response types are any structures in the package.
 }
 
 func runEndpoint(options endpointOptions) error {
-	var generator genall.Generator = endpoint.Generator{
+	var generator genall.Generator = endpointgen.Generator{
 		HeaderFile: options.headerFile,
 		Year:       options.year,
 	}

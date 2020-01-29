@@ -49,7 +49,7 @@ func Parse(dir string, interfaceName string) (Service, error) {
 			continue
 		}
 
-		svc, err := parseInterface(obj)
+		svc, err := ParseInterface(obj)
 		if err != nil {
 			return svc, err
 		}
@@ -60,7 +60,8 @@ func Parse(dir string, interfaceName string) (Service, error) {
 	return Service{}, errors.New("interface not found")
 }
 
-func parseInterface(obj types.Object) (Service, error) {
+// ParseInterface parses an object as a service interface.
+func ParseInterface(obj types.Object) (Service, error) {
 	iface, ok := obj.Type().Underlying().(*types.Interface)
 	if !ok {
 		return Service{}, fmt.Errorf("%q is not an interface", obj.Name())

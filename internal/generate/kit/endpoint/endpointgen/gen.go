@@ -1,4 +1,4 @@
-package endpoint
+package endpointgen
 
 import (
 	"fmt"
@@ -12,8 +12,10 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/markers"
 
 	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
 )
 
+// nolint: gochecknoglobals
 var (
 	endpointMarker = markers.Must(markers.MakeDefinition("kit:endpoint", markers.DescribesType, Marker{}))
 )
@@ -94,7 +96,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 
 	root.NeedTypesInfo()
 
-	var endpointSets []EndpointSet
+	var endpointSets []endpoint.EndpointSet
 
 	err := markers.EachType(ctx.Collector, root, func(info *markers.TypeInfo) {
 		marker, ok := info.Markers.Get(endpointMarker.Name).(Marker)
@@ -109,14 +111,14 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			return
 		}
 
-		svc, err := parseInterface(root.TypesInfo.ObjectOf(info.RawSpec.Name))
+		svc, err := endpoint.ParseInterface(root.TypesInfo.ObjectOf(info.RawSpec.Name))
 		if err != nil {
 			root.AddError(err)
 
 			return
 		}
 
-		endpointSets = append(endpointSets, endpointSetFromService(svc, marker))
+		endpointSets = append(endpointSets, endpoint.EndpointSetFromService(svc, endpoint.GeneratorOptions(marker)))
 	})
 	if err != nil {
 		root.AddError(err)
@@ -128,7 +130,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		return nil
 	}
 
-	file := File{
+	file := endpoint.File{
 		File: gentypes.File{
 			Package: gentypes.PackageRef{
 				Name: root.Name + "driver",
@@ -139,7 +141,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		EndpointSets: endpointSets,
 	}
 
-	outContents, err := Generate(file)
+	outContents, err := endpoint.Generate(file)
 	if err != nil {
 		root.AddError(err)
 
@@ -147,48 +149,6 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 	}
 
 	return outContents
-}
-
-func endpointSetFromService(svc Service, marker Marker) EndpointSet {
-	baseName := marker.BaseName
-	withOpenCensus := marker.WithOpenCensus
-	moduleName := marker.ModuleName
-
-	if baseName == "" {
-		baseName = strings.TrimSuffix(svc.Name, "Service")
-	}
-
-	endpointSet := EndpointSet{
-		Name:           baseName,
-		Service:        svc.TypeRef,
-		Endpoints:      nil,
-		WithOpenCensus: withOpenCensus,
-	}
-
-	if moduleName == "" {
-		moduleName = svc.Package.Name
-	}
-
-	for _, method := range svc.Methods {
-		var operationName string
-
-		// if endpoint set name is empty, do not add it to the operation name
-		if endpointSet.Name == "" {
-			operationName = fmt.Sprintf("%s.%s", moduleName, method.Name)
-		} else {
-			operationName = fmt.Sprintf("%s.%s.%s", moduleName, endpointSet.Name, method.Name)
-		}
-
-		endpointSet.Endpoints = append(
-			endpointSet.Endpoints,
-			Endpoint{
-				Name:          method.Name,
-				OperationName: operationName,
-			},
-		)
-	}
-
-	return endpointSet
 }
 
 // writeOut outputs the given code.
