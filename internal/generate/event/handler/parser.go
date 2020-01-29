@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
 // Event describes an event struct.

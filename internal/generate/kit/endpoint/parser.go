@@ -7,7 +7,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
 // Service describes a service interface.

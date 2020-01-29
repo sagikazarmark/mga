@@ -7,7 +7,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
 // File represents one or more services and provides information for generating endpoints for these services.

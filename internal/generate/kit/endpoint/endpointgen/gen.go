@@ -11,8 +11,8 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/loader"
 	"sigs.k8s.io/controller-tools/pkg/markers"
 
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
+	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
 // nolint: gochecknoglobals
