@@ -1,21 +1,20 @@
 package event
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-tools/pkg/genall"
 
-	"sagikazarmark.dev/mga/internal/generate/event/dispatcher"
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/internal/generate/event/dispatcher/dispatchergen"
+	"sagikazarmark.dev/mga/pkg/genutils"
 )
 
 type dispatcherOptions struct {
-	baseInterface string
-	outdir        string
+	headerFile string
+	year       string
+
+	paths []string
 }
 
 // NewDispatcherCommand returns a cobra command for generating an event dispatcher.
@@ -23,10 +22,10 @@ func NewDispatcherCommand() *cobra.Command {
 	var options dispatcherOptions
 
 	cmd := &cobra.Command{
-		Use:     "dispatcher [options] INTERFACE",
+		Use:     "dispatcher [options] [paths]",
 		Aliases: []string{"d", "disp"},
-		Short:   "Generate an event dispatcher from a base interface",
-		Long: `This command generates a type safe event dispatcher implementation with an underlying generic event bus.
+		Short:   "Generate a event dispatcher implementations from base interfaces",
+		Long: `This command generates type safe event dispatcher implementations with an underlying generic event bus.
 The event bus itself is an interface generated alongside the dispatcher:
 
 	type EventBus interface {
@@ -53,7 +52,7 @@ but interface methods cannot accept or return more or different parameters.
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			options.baseInterface = args[0]
+			options.paths = args
 
 			return runDispatcher(options)
 		},
@@ -61,95 +60,34 @@ but interface methods cannot accept or return more or different parameters.
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
+	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
+	flags.StringVar(&options.year, "year", "", "copyright year")
 
 	return cmd
 }
 
 func runDispatcher(options dispatcherOptions) error {
-	indir := "."
+	var generator genall.Generator = dispatchergen.Generator{
+		HeaderFile: options.headerFile,
+		Year:       options.year,
+	}
 
-	events, err := dispatcher.Parse(indir, options.baseInterface)
+	generators := genall.Generators{&generator}
+
+	if len(options.paths) == 0 {
+		options.paths = []string{"."}
+	}
+
+	runtime, err := generators.ForRoots(options.paths...)
 	if err != nil {
 		return err
 	}
 
-	var packageRef gentypes.PackageRef
-	var absOutDir string
+	runtime.OutputRules.Default = genutils.OutputArtifacts{}
 
-	if options.outdir == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-
-		options.outdir = filepath.Base(cwd) + "gen"
-		packageRef.Name = filepath.Base(options.outdir)
-
-		absOut, err := filepath.Abs(options.outdir)
-		if err != nil {
-			return err
-		}
-
-		absOutDir = absOut
-	} else {
-		absOut, err := filepath.Abs(options.outdir)
-		if err != nil {
-			return err
-		}
-		absOutDir = absOut
-
-		packageRef.Name = filepath.Base(absOut)
-
-		absIn, err := filepath.Abs(indir)
-		if err != nil {
-			return err
-		}
-
-		if absIn == absOut { // When the input and the output directories are the same
-			packageRef = events.Package
-		}
-	}
-
-	err = os.MkdirAll(absOutDir, 0755)
-	if err != nil {
-		return err
-	}
-
-	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_dispatcher_gen.go", events.Name))
-
-	file := dispatcher.File{
-		File: gentypes.File{
-			Package:    packageRef,
-			HeaderText: "",
-		},
-		EventDispatchers: []dispatcher.EventDispatcher{
-			{
-				Name:              cleanEventDispatcherName(events.Name),
-				DispatcherMethods: events.Methods,
-			},
-		},
-	}
-
-	fmt.Printf("Generating event dispatcher for %s in %s\n", events.Name, resFile)
-
-	res, err := dispatcher.Generate(file)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(resFile, res, 0644)
-	if err != nil {
-		return err
+	if hadErrs := runtime.Run(); hadErrs {
+		os.Exit(1)
 	}
 
 	return nil
-}
-
-func cleanEventDispatcherName(name string) string {
-	name = strings.TrimSuffix(name, "Events")
-	name = strings.TrimSuffix(name, "EventBus")
-	name = strings.TrimSuffix(name, "EventDispatcher")
-
-	return name
 }

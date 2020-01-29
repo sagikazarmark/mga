@@ -1,20 +1,20 @@
 package event
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"sigs.k8s.io/controller-tools/pkg/genall"
 
-	"sagikazarmark.dev/mga/internal/generate/event/handler"
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/internal/generate/event/handler/handlergen"
+	"sagikazarmark.dev/mga/pkg/genutils"
 )
 
 type handlerOptions struct {
-	event  string
-	outdir string
+	headerFile string
+	year       string
+
+	paths []string
 }
 
 // NewHandlerCommand returns a cobra command for generating an event handler.
@@ -22,10 +22,10 @@ func NewHandlerCommand() *cobra.Command {
 	var options handlerOptions
 
 	cmd := &cobra.Command{
-		Use:     "handler [options] INTERFACE",
+		Use:     "handler [options] [paths]",
 		Aliases: []string{"h"},
-		Short:   "Generate an event handler for an event",
-		Long: `This command generates a type safe event handler implementation for an event.
+		Short:   "Generate event handlers for events",
+		Long: `This command generates type safe event handler implementations for events.
 An event can be any plain, exported struct:
 
 	type Event struct {
@@ -39,7 +39,7 @@ The generated handler is compatible with Watermill (https://github.com/ThreeDots
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
 
-			options.event = args[0]
+			options.paths = args
 
 			return runHandler(options)
 		},
@@ -47,86 +47,33 @@ The generated handler is compatible with Watermill (https://github.com/ThreeDots
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&options.outdir, "outdir", "", "output directory (default: $PWD/currdir+'gen', eg. module/modulegen)")
+	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
+	flags.StringVar(&options.year, "year", "", "copyright year")
 
 	return cmd
 }
 
 func runHandler(options handlerOptions) error {
-	indir := "."
+	var generator genall.Generator = handlergen.Generator{
+		HeaderFile: options.headerFile,
+		Year:       options.year,
+	}
 
-	event, err := handler.Parse(indir, options.event)
+	generators := genall.Generators{&generator}
+
+	if len(options.paths) == 0 {
+		options.paths = []string{"."}
+	}
+
+	runtime, err := generators.ForRoots(options.paths...)
 	if err != nil {
 		return err
 	}
 
-	var packageRef gentypes.PackageRef
-	var absOutDir string
+	runtime.OutputRules.Default = genutils.OutputArtifacts{}
 
-	if options.outdir == "" {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-
-		options.outdir = filepath.Base(cwd) + "gen"
-		packageRef.Name = filepath.Base(options.outdir)
-
-		absOut, err := filepath.Abs(options.outdir)
-		if err != nil {
-			return err
-		}
-
-		absOutDir = absOut
-	} else {
-		absOut, err := filepath.Abs(options.outdir)
-		if err != nil {
-			return err
-		}
-		absOutDir = absOut
-
-		packageRef.Name = filepath.Base(absOut)
-
-		absIn, err := filepath.Abs(indir)
-		if err != nil {
-			return err
-		}
-
-		if absIn == absOut { // When the input and the output directories are the same
-			packageRef = event.Package
-		}
-	}
-
-	err = os.MkdirAll(absOutDir, 0755)
-	if err != nil {
-		return err
-	}
-
-	file := handler.File{
-		File: gentypes.File{
-			Package:    packageRef,
-			HeaderText: "",
-		},
-		EventHandlers: []handler.EventHandler{
-			{
-				Name:  event.Name,
-				Event: event,
-			},
-		},
-	}
-
-	resFile := filepath.Join(absOutDir, fmt.Sprintf("%s_event_handler_gen.go", event.Name))
-
-	fmt.Printf("Generating event handler for %s in %s\n", event.Name, resFile)
-
-	res, err := handler.Generate(file)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(resFile, res, 0644)
-	if err != nil {
-		return err
+	if hadErrs := runtime.Run(); hadErrs {
+		os.Exit(1)
 	}
 
 	return nil

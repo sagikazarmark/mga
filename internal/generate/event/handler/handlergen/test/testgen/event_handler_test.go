@@ -1,4 +1,4 @@
-package test
+package testgen
 
 import (
 	"context"
@@ -7,14 +7,16 @@ import (
 	"github.com/ThreeDotsLabs/watermill/components/cqrs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"sagikazarmark.dev/mga/internal/generate/event/handler/handlergen/test"
 )
 
 type eventHandlerStub struct {
 	ctx   context.Context
-	event Event
+	event test.Event
 }
 
-func (s *eventHandlerStub) Event(ctx context.Context, event Event) error {
+func (s *eventHandlerStub) Event(ctx context.Context, event test.Event) error {
 	s.ctx = ctx
 	s.event = event
 
@@ -40,7 +42,7 @@ func TestEventEventHandler_NewEvent(t *testing.T) {
 
 	event := handler.NewEvent()
 
-	assert.IsType(t, &Event{}, event)
+	assert.IsType(t, &test.Event{}, event)
 }
 
 func TestEventEventHandler_Handle(t *testing.T) {
@@ -48,7 +50,7 @@ func TestEventEventHandler_Handle(t *testing.T) {
 	handler := NewEventEventHandler(h, "event_handler")
 
 	ctx := context.Background()
-	event := Event{
+	event := test.Event{
 		ID: "1234",
 	}
 
