@@ -1,4 +1,4 @@
-package test
+package testgen
 
 import (
 	"context"
@@ -14,6 +14,8 @@ import (
 	"github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"sagikazarmark.dev/mga/internal/generate/event/dispatcher/dispatchergen/test"
 )
 
 func setUpPublisher(t *testing.T) (*cqrs.EventBus, <-chan *message.Message) {
@@ -33,7 +35,7 @@ func TestEventDispatcher_Event(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
@@ -44,7 +46,7 @@ func TestEventDispatcher_Event(t *testing.T) {
 		t.Fatal("no message received")
 	}
 
-	var receivedEvent Event
+	var receivedEvent test.Event
 
 	err := json.Unmarshal(received[0].Payload, &receivedEvent)
 	require.NoError(t, err)
@@ -57,7 +59,7 @@ func TestEventDispatcher_EventWithContext(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
@@ -68,7 +70,7 @@ func TestEventDispatcher_EventWithContext(t *testing.T) {
 		t.Fatal("no message received")
 	}
 
-	var receivedEvent Event
+	var receivedEvent test.Event
 
 	err := json.Unmarshal(received[0].Payload, &receivedEvent)
 	require.NoError(t, err)
@@ -81,7 +83,7 @@ func TestEventDispatcher_EventWithContextAndError(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
@@ -93,7 +95,7 @@ func TestEventDispatcher_EventWithContextAndError(t *testing.T) {
 		t.Fatal("no message received")
 	}
 
-	var receivedEvent Event
+	var receivedEvent test.Event
 
 	err = json.Unmarshal(received[0].Payload, &receivedEvent)
 	require.NoError(t, err)
@@ -106,7 +108,7 @@ func TestEventDispatcher_EventWithError(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
@@ -118,7 +120,7 @@ func TestEventDispatcher_EventWithError(t *testing.T) {
 		t.Fatal("no message received")
 	}
 
-	var receivedEvent Event
+	var receivedEvent test.Event
 
 	err = json.Unmarshal(received[0].Payload, &receivedEvent)
 	require.NoError(t, err)
@@ -140,7 +142,7 @@ func TestEventDispatcher_EventWithContextAndError_Error(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
@@ -155,7 +157,7 @@ func TestEventDispatcher_EventWithError_Error(t *testing.T) {
 
 	events := NewEventDispatcher(eventBus)
 
-	event := Event{
+	event := test.Event{
 		ID: "id",
 	}
 
