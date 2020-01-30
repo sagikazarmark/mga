@@ -13,6 +13,7 @@ import (
 
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint"
 	"sagikazarmark.dev/mga/pkg/gentypes"
+	"sagikazarmark.dev/mga/pkg/genutils"
 )
 
 // nolint: gochecknoglobals
@@ -130,11 +131,16 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		return nil
 	}
 
+	packageName, packagePath := root.Name, root.PkgPath
+	if pkgrefer, ok := ctx.OutputRule.(genutils.PackageRefer); ok {
+		packageName, packagePath = pkgrefer.PackageRef(root)
+	}
+
 	file := endpoint.File{
 		File: gentypes.File{
 			Package: gentypes.PackageRef{
-				Name: root.Name + "driver",
-				Path: root.PkgPath + "/" + root.Name + "driver",
+				Name: packageName,
+				Path: packagePath,
 			},
 			HeaderText: headerText,
 		},
@@ -153,7 +159,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 
 // writeOut outputs the given code.
 func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []byte) {
-	outputFile, err := ctx.Open(root, fmt.Sprintf("%sdriver/zz_generated.endpoint.go", root.Name))
+	outputFile, err := ctx.Open(root, "zz_generated.endpoint.go")
 	if err != nil {
 		root.AddError(err)
 		return

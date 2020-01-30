@@ -14,7 +14,8 @@ type handlerOptions struct {
 	headerFile string
 	year       string
 
-	paths []string
+	paths  []string
+	output string
 }
 
 // NewHandlerCommand returns a cobra command for generating an event handler.
@@ -34,7 +35,6 @@ An event can be any plain, exported struct:
 
 The generated handler is compatible with Watermill (https://github.com/ThreeDotsLabs/watermill).
 `,
-		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
@@ -47,6 +47,7 @@ The generated handler is compatible with Watermill (https://github.com/ThreeDots
 
 	flags := cmd.Flags()
 
+	flags.StringVar(&options.output, "output", "pkg", "output rule")
 	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
 	flags.StringVar(&options.year, "year", "", "copyright year")
 
@@ -70,7 +71,12 @@ func runHandler(options handlerOptions) error {
 		return err
 	}
 
-	runtime.OutputRules.Default = genutils.OutputArtifacts{}
+	outputRule, err := genutils.LookupOutput(options.output)
+	if err != nil {
+		return err
+	}
+
+	runtime.OutputRules.Default = outputRule
 
 	if hadErrs := runtime.Run(); hadErrs {
 		os.Exit(1)

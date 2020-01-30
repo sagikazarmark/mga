@@ -14,7 +14,8 @@ type endpointOptions struct {
 	headerFile string
 	year       string
 
-	paths []string
+	paths  []string
+	output string
 }
 
 // NewEndpointCommand returns a cobra command for generating an endpoint.
@@ -24,8 +25,8 @@ func NewEndpointCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "endpoint [options] [paths]",
 		Aliases: []string{"e"},
-		Short:   "Generate endpoints from service interfaces",
-		Long: `This command generates a type safe endpoint struct.
+		Short:   "Generate Go kit endpoints from service interfaces",
+		Long: `This command generates type safe Go kit endpoint structs.
 
 Service interfaces look like the following:
 
@@ -50,6 +51,7 @@ where request and response types are any structures in the package.
 
 	flags := cmd.Flags()
 
+	flags.StringVar(&options.output, "output", "subpkg:suffix=driver", "output rule")
 	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
 	flags.StringVar(&options.year, "year", "", "copyright year")
 
@@ -73,7 +75,12 @@ func runEndpoint(options endpointOptions) error {
 		return err
 	}
 
-	runtime.OutputRules.Default = genutils.OutputArtifacts{}
+	outputRule, err := genutils.LookupOutput(options.output)
+	if err != nil {
+		return err
+	}
+
+	runtime.OutputRules.Default = outputRule
 
 	if hadErrs := runtime.Run(); hadErrs {
 		os.Exit(1)
