@@ -30,7 +30,6 @@ func NewEndpointCommand() *cobra.Command {
 
 Service interfaces look like the following:
 
-	// +kit:endpoint:withOpenCensus=false,moduleName=my.module,baseName=MyService
 	type Service interface {
 		Call(ctx context.Context, req interface{}) (interface{}, error)
 
