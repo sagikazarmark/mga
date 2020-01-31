@@ -14,7 +14,8 @@ type dispatcherOptions struct {
 	headerFile string
 	year       string
 
-	paths []string
+	paths  []string
+	output string
 }
 
 // NewDispatcherCommand returns a cobra command for generating an event dispatcher.
@@ -22,9 +23,9 @@ func NewDispatcherCommand() *cobra.Command {
 	var options dispatcherOptions
 
 	cmd := &cobra.Command{
-		Use:     "dispatcher [options] [paths]",
+		Use:     "dispatcher [flags] [paths]",
 		Aliases: []string{"d", "disp"},
-		Short:   "Generate a event dispatcher implementations from base interfaces",
+		Short:   "Generate implementations for event dispatcher interfaces",
 		Long: `This command generates type safe event dispatcher implementations with an underlying generic event bus.
 The event bus itself is an interface generated alongside the dispatcher:
 
@@ -47,7 +48,6 @@ where Event is a simple data structure containing the event payload.
 The context parameter and the error return value are both optional,
 but interface methods cannot accept or return more or different parameters.
 `,
-		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceErrors = true
 			cmd.SilenceUsage = true
@@ -60,8 +60,9 @@ but interface methods cannot accept or return more or different parameters.
 
 	flags := cmd.Flags()
 
+	flags.StringVar(&options.output, "output", "pkg", "output rule")
 	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
-	flags.StringVar(&options.year, "year", "", "copyright year")
+	flags.StringVar(&options.year, "year", "", "copyright year replacing YEAR in the header text")
 
 	return cmd
 }
@@ -83,7 +84,12 @@ func runDispatcher(options dispatcherOptions) error {
 		return err
 	}
 
-	runtime.OutputRules.Default = genutils.OutputArtifacts{}
+	outputRule, err := genutils.LookupOutput(options.output)
+	if err != nil {
+		return err
+	}
+
+	runtime.OutputRules.Default = outputRule
 
 	if hadErrs := runtime.Run(); hadErrs {
 		os.Exit(1)

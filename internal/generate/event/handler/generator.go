@@ -6,7 +6,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
 // File provides information for generating event handlers.

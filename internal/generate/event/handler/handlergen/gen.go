@@ -12,7 +12,8 @@ import (
 	"sigs.k8s.io/controller-tools/pkg/markers"
 
 	"sagikazarmark.dev/mga/internal/generate/event/handler"
-	"sagikazarmark.dev/mga/internal/generate/gentypes"
+	"sagikazarmark.dev/mga/pkg/gentypes"
+	"sagikazarmark.dev/mga/pkg/genutils"
 )
 
 // nolint: gochecknoglobals
@@ -111,11 +112,16 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		return nil
 	}
 
+	packageName, packagePath := root.Name, root.PkgPath
+	if pkgrefer, ok := ctx.OutputRule.(genutils.PackageRefer); ok {
+		packageName, packagePath = pkgrefer.PackageRef(root)
+	}
+
 	file := handler.File{
 		File: gentypes.File{
 			Package: gentypes.PackageRef{
-				Name: root.Name + "gen",
-				Path: root.PkgPath + "/" + root.Name + "gen",
+				Name: packageName,
+				Path: packagePath,
 			},
 			HeaderText: headerText,
 		},
@@ -134,7 +140,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 
 // writeOut outputs the given code.
 func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []byte) {
-	outputFile, err := ctx.Open(root, fmt.Sprintf("%sgen/zz_generated.event_handler.go", root.Name))
+	outputFile, err := ctx.Open(root, "zz_generated.event_handler.go")
 	if err != nil {
 		root.AddError(err)
 		return
