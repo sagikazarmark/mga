@@ -23,7 +23,7 @@ func NewEndpointCommand() *cobra.Command {
 	var options endpointOptions
 
 	cmd := &cobra.Command{
-		Use:     "endpoint [options] [paths]",
+		Use:     "endpoint [flags] [paths]",
 		Aliases: []string{"e"},
 		Short:   "Generate Go kit endpoints from service interfaces",
 		Long: `This command generates type safe Go kit endpoint structs.

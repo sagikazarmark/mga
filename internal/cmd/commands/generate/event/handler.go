@@ -23,7 +23,7 @@ func NewHandlerCommand() *cobra.Command {
 	var options handlerOptions
 
 	cmd := &cobra.Command{
-		Use:     "handler [options] [paths]",
+		Use:     "handler [flags] [paths]",
 		Aliases: []string{"h"},
 		Short:   "Generate event handlers for events",
 		Long: `This command generates type safe event handler implementations for events.
