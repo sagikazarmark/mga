@@ -64,8 +64,20 @@ func Generate(file File) ([]byte, error) {
 	code.ImportName("github.com/go-kit/kit/endpoint", "endpoint")
 	code.ImportAlias("github.com/sagikazarmark/kitx/endpoint", "kitxendpoint")
 
+	endpointNames := map[string]bool{}
+	var i int
+
 	for _, set := range file.EndpointSets {
-		generateEndpointSet(code, set)
+		for _, endpoint := range set.Endpoints {
+			endpointNames[endpoint.Name] = true
+			i++
+		}
+	}
+
+	endpointNamesUnique := len(endpointNames) == i
+
+	for _, set := range file.EndpointSets {
+		generateEndpointSet(code, set, endpointNamesUnique)
 	}
 
 	var buf bytes.Buffer
@@ -78,7 +90,7 @@ func Generate(file File) ([]byte, error) {
 	return format.Source(buf.Bytes())
 }
 
-func generateEndpointSet(code *jen.File, set EndpointSet) {
+func generateEndpointSet(code *jen.File, set EndpointSet, endpointNamesUnique bool) {
 	code.ImportName(set.Service.Package.Path, set.Service.Package.Name)
 
 	endpointStructName := fmt.Sprintf("%sEndpoints", set.Name)
@@ -88,12 +100,19 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 	endpoints := make([]jen.Code, 0, len(set.Endpoints))
 	endpointDict := jen.Dict{}
 	for _, endpoint := range set.Endpoints {
+		var endpointConstructorName string
+		if endpointNamesUnique {
+			endpointConstructorName = fmt.Sprintf("Make%sEndpoint", endpoint.Name)
+		} else {
+			endpointConstructorName = fmt.Sprintf("Make%s%sEndpoint", endpoint.Name, set.Name)
+		}
+
 		endpoints = append(endpoints, jen.Id(endpoint.Name).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
 		endpointDict[jen.Id(endpoint.Name)] = jen.Qual("github.com/sagikazarmark/kitx/endpoint", "OperationNameMiddleware").
 			Call(jen.Lit(endpoint.OperationName)).
 			Call(
 				jen.Id("mw").Call(
-					jen.Id(fmt.Sprintf("Make%s%sEndpoint", endpoint.Name, set.Name)).Call(jen.Id("service")),
+					jen.Id(endpointConstructorName).Call(jen.Id("service")),
 				),
 			)
 	}
