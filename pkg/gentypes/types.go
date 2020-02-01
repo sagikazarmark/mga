@@ -6,8 +6,13 @@ type TypeRef struct {
 	// Name of the type.
 	Name string
 
-	// PackageName is a reference to the package where the type can be found.
+	// Package is a reference to the package where the type can be found.
 	Package PackageRef
+}
+
+// IsBuiltin checks if a type references a builtin type.
+func (t TypeRef) IsBuiltin() bool {
+	return t.Package.Name == "" && t.Package.Path == ""
 }
 
 // PackageRef is a reference to a package.
@@ -18,6 +23,17 @@ type PackageRef struct {
 
 	// Path to the package.
 	Path string
+}
+
+// Argument is an argument or return argument.
+type Argument struct {
+	// Name of the argument.
+	// In case of interfaces this might be empty.
+	Name string
+
+	// Type is a reference to the type of argument.
+	// If the type is a builtin type, the underlying Package is empty.
+	Type TypeRef
 }
 
 // File is an input to source code generation.

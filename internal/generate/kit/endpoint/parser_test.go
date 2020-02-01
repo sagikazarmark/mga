@@ -21,6 +21,22 @@ func TestParse(t *testing.T) {
 		Methods: []ServiceMethod{
 			{
 				Name: "Call",
+				RequestParameters: []gentypes.Argument{
+					{
+						Name: "req",
+						Type: gentypes.TypeRef{
+							Name: "interface{}",
+						},
+					},
+				},
+				ResponseParameters: []gentypes.Argument{
+					{
+						Name: "",
+						Type: gentypes.TypeRef{
+							Name: "interface{}",
+						},
+					},
+				},
 			},
 		},
 	}
