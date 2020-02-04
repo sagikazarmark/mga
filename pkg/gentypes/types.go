@@ -10,11 +10,6 @@ type TypeRef struct {
 	Package PackageRef
 }
 
-// IsBuiltin checks if a type references a builtin type.
-func (t TypeRef) IsBuiltin() bool {
-	return t.Package.Name == "" && t.Package.Path == ""
-}
-
 // PackageRef is a reference to a package.
 // It can be used generate code referring to a package.
 type PackageRef struct {

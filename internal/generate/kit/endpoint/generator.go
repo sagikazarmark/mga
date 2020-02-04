@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 
 	"sagikazarmark.dev/mga/pkg/gentypes"
+	"sagikazarmark.dev/mga/pkg/jenutils"
 )
 
 // File represents one or more services and provides information for generating endpoints for these services.
@@ -21,32 +24,16 @@ type File struct {
 // EndpointSet represents a set of endpoints for a single service.
 // nolint: golint
 type EndpointSet struct {
-	// Name identifies the endpoint set.
-	//
-	// Normally, it's generated from the service name by removing the "Service" suffix (if any).
-	// That can often result in an empty endpoint set name which is normal for single-service packages.
-	Name string
-
-	// Service is a reference to the original service this endpoint set is being generated from.
-	Service gentypes.TypeRef
-
-	// Endpoints is the list of endpoints represented by the set.
-	Endpoints []Endpoint
+	Service Service
 
 	// WithOpenCensus enables generating a trace middleware for the endpoint set.
 	WithOpenCensus bool
 }
 
-// Endpoint represents an endpoint for a single service call.
-// nolint: golint
-type Endpoint struct {
-	// Name identifies a call within a service.
-	Name string
-
-	// OperationName uniquely identifies a service call.
-	//
-	// When empty it falls back to "packageIdentifier(.endpointSetName)?.endpointName".
-	OperationName string
+// Service represents a service interface
+type Service struct {
+	Object *types.TypeName
+	Type   *types.Interface
 }
 
 // Generate generates Go kit endpoint sets for services.
@@ -64,20 +51,13 @@ func Generate(file File) ([]byte, error) {
 	code.ImportName("github.com/go-kit/kit/endpoint", "endpoint")
 	code.ImportAlias("github.com/sagikazarmark/kitx/endpoint", "kitxendpoint")
 
-	endpointNames := map[string]bool{}
-	var i int
+	code.Comment("endpointError identifies an error that should be returned as an error endpoint.")
+	code.Type().Id("endpointError").Interface(
+		jen.Id("EndpointError").Params().Bool(),
+	)
 
 	for _, set := range file.EndpointSets {
-		for _, endpoint := range set.Endpoints {
-			endpointNames[endpoint.Name] = true
-			i++
-		}
-	}
-
-	endpointNamesUnique := len(endpointNames) == i
-
-	for _, set := range file.EndpointSets {
-		generateEndpointSet(code, set, endpointNamesUnique)
+		generateEndpointSet(code, set)
 	}
 
 	var buf bytes.Buffer
@@ -90,46 +70,195 @@ func Generate(file File) ([]byte, error) {
 	return format.Source(buf.Bytes())
 }
 
-func generateEndpointSet(code *jen.File, set EndpointSet, endpointNamesUnique bool) {
-	code.ImportName(set.Service.Package.Path, set.Service.Package.Name)
+func generateEndpointSet(code *jen.File, set EndpointSet) {
+	svc := set.Service
 
-	endpointStructName := fmt.Sprintf("%sEndpoints", set.Name)
-	endpointFactoryName := fmt.Sprintf("Make%sEndpoints", set.Name)
-	endpointTraceFactoryName := fmt.Sprintf("Trace%sEndpoints", set.Name)
+	// import the service package
+	code.ImportName(svc.Object.Pkg().Path(), svc.Object.Pkg().Name())
 
-	endpoints := make([]jen.Code, 0, len(set.Endpoints))
-	endpointDict := jen.Dict{}
-	for _, endpoint := range set.Endpoints {
-		var endpointConstructorName string
-		if endpointNamesUnique {
-			endpointConstructorName = fmt.Sprintf("Make%sEndpoint", endpoint.Name)
+	name := strings.TrimSuffix(svc.Object.Name(), "Service")
+
+	endpointSetName := fmt.Sprintf("%sEndpoints", name)
+	endpointSetFactoryName := fmt.Sprintf("Make%sEndpoints", name)
+	endpointSetTraceFactoryName := fmt.Sprintf("Trace%sEndpoints", name)
+
+	endpointSetFields := make([]jen.Code, 0, svc.Type.NumMethods())
+	endpointSetDict := jen.Dict{}
+	endpointSetTraceDict := jen.Dict{}
+	endpoints := make([]jen.Code, 0, svc.Type.NumMethods()*6) // request, response, factory + comments
+
+	for i := 0; i < svc.Type.NumMethods(); i++ {
+		method := svc.Type.Method(i)
+
+		endpointName := method.Name()
+
+		var operationName string
+		if name == "" {
+			operationName = fmt.Sprintf("%s.%s", svc.Object.Pkg().Name(), endpointName)
 		} else {
-			endpointConstructorName = fmt.Sprintf("Make%s%sEndpoint", endpoint.Name, set.Name)
+			operationName = fmt.Sprintf("%s.%s.%s", svc.Object.Pkg().Name(), name, endpointName)
 		}
 
-		endpoints = append(endpoints, jen.Id(endpoint.Name).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
-		endpointDict[jen.Id(endpoint.Name)] = jen.Qual("github.com/sagikazarmark/kitx/endpoint", "OperationNameMiddleware").
-			Call(jen.Lit(endpoint.OperationName)).
+		// Ignore unexported methods
+		if !method.Exported() {
+			continue
+		}
+
+		endpointFactoryName := fmt.Sprintf("Make%s%sEndpoint", endpointName, name)
+
+		endpointSetFields = append(endpointSetFields, jen.Id(endpointName).Qual("github.com/go-kit/kit/endpoint", "Endpoint"))
+		endpointSetDict[jen.Id(endpointName)] = jen.Qual("github.com/sagikazarmark/kitx/endpoint", "OperationNameMiddleware").
+			Call(jen.Lit(operationName)).
 			Call(
 				jen.Id("mw").Call(
-					jen.Id(endpointConstructorName).Call(jen.Id("service")),
+					jen.Id(endpointFactoryName).Call(jen.Id("service")),
 				),
 			)
+
+		if set.WithOpenCensus {
+			endpointSetTraceDict[jen.Id(endpointName)] = jen.Qual(
+				"github.com/go-kit/kit/tracing/opencensus",
+				"TraceEndpoint",
+			).
+				Call(jen.Lit(operationName)).
+				Call(jen.Id("endpoints").Dot(endpointName))
+		}
+
+		sig := method.Type().(*types.Signature)
+
+		requestName := fmt.Sprintf("%s%sRequest", endpointName, name)
+		responseName := fmt.Sprintf("%s%sResponse", endpointName, name)
+
+		var callParams []jen.Code
+		returnValues := &jen.Statement{}
+		responseDict := jen.Dict{}
+		responseErrorDict := jen.Dict{}
+
+		{
+			numParams := sig.Params().Len()
+			fields := make([]jen.Code, 0, numParams)
+
+			for i := 1; i < numParams; i++ {
+				param := sig.Params().At(i)
+
+				name := param.Name()
+				if name == "" {
+					name = fmt.Sprintf("p%d", i-1)
+				}
+
+				name = jenutils.Export(name)
+
+				fields = append(fields, jenutils.Type(jen.Id(name), param.Type()))
+				callParams = append(callParams, jen.Id("req").Dot(name))
+			}
+
+			endpoints = append(
+				endpoints,
+				jen.Commentf("%s is a request struct for %s endpoint.", requestName, endpointName),
+				jen.Type().Id(requestName).Struct(fields...),
+			)
+		}
+
+		{
+			numResults := sig.Results().Len()
+			fields := make([]jen.Code, 0, numResults)
+
+			for i := 0; i < numResults-1; i++ {
+				result := sig.Results().At(i)
+
+				name := result.Name()
+				if name == "" {
+					name = fmt.Sprintf("r%d", i)
+				}
+
+				fieldName := jenutils.Export(name)
+				varName := jenutils.Unexport(name)
+
+				fields = append(fields, jenutils.Type(jen.Id(fieldName), result.Type()))
+				returnValues.Id(varName).Op(",")
+
+				responseDict[jen.Id(fieldName)] = jen.Id(varName)
+				responseErrorDict[jen.Id(fieldName)] = jen.Id(varName)
+			}
+
+			fields = append(fields, jen.Id("Err").Error())
+			returnValues.Err()
+			responseErrorDict[jen.Id("Err")] = jen.Err()
+
+			endpoints = append(
+				endpoints,
+				jen.Commentf("%s is a response struct for %s endpoint.", responseName, endpointName),
+				jen.Type().Id(responseName).Struct(fields...),
+			)
+		}
+
+		endpoints = append(
+			endpoints,
+			jen.Commentf("%s returns an endpoint for the matching method of the underlying service.", endpointFactoryName),
+			jen.Func().Id(endpointFactoryName).
+				Params(jen.Id("service").Qual(svc.Object.Pkg().Path(), svc.Object.Name())).
+				Params(jen.Qual("github.com/go-kit/kit/endpoint", "Endpoint")).
+				Block(
+					jen.Return(
+						jen.Func().
+							Params(
+								jen.Id("ctx").Qual("context", "Context"),
+								jen.Id("request").Interface(),
+							).
+							Params( // named return parameter causes trouble when there are no result parameters (err: no new parameters)
+								jen.Interface(),
+								jen.Error(),
+							).
+							Block(
+								jen.Id("req").Op(":=").Id("request").Assert(jen.Op("*").Id(requestName)),
+								jen.Line(),
+								returnValues.Op(":=").Id("service").Dot(endpointName).Call(
+									append([]jen.Code{jen.Id("ctx")}, callParams...)...,
+								),
+								jen.Line(),
+								jen.If(jen.Err().Op("!=").Nil()).Block(
+									jen.If(
+										jen.Id("endpointErr").Op(":=").Id("endpointError").Parens(jen.Nil()),
+										jen.Qual("errors", "As").Call(
+											jen.Err(),
+											jen.Op("&").Id("endpointErr"),
+										).Op("&&").Id("endpointErr").Dot("EndpointError").Call(),
+									).Block(
+										jen.Return(
+											jen.Op("&").Id(responseName).Values(responseErrorDict),
+											jen.Err(),
+										),
+									),
+									jen.Line(),
+									jen.Return(
+										jen.Op("&").Id(responseName).Values(responseErrorDict),
+										jen.Nil(),
+									),
+								),
+								jen.Line(),
+								jen.Return(
+									jen.Op("&").Id(responseName).Values(responseDict),
+									jen.Nil(),
+								),
+							),
+					),
+				),
+		)
 	}
 
-	code.Commentf("%s collects all of the endpoints that compose the underlying service. It's", endpointStructName)
+	code.Commentf("%s collects all of the endpoints that compose the underlying service. It's", endpointSetName)
 	code.Comment("meant to be used as a helper struct, to collect all of the endpoints into a")
 	code.Comment("single parameter.")
-	code.Type().Id(endpointStructName).Struct(endpoints...)
+	code.Type().Id(endpointSetName).Struct(endpointSetFields...)
 
-	code.Commentf("%s returns a(n) %s struct where each endpoint invokes", endpointFactoryName, endpointStructName)
+	code.Commentf("%s returns a(n) %s struct where each endpoint invokes", endpointSetFactoryName, endpointSetName)
 	code.Comment("the corresponding method on the provided service.")
-	code.Func().Id(endpointFactoryName).
+	code.Func().Id(endpointSetFactoryName).
 		Params(
-			jen.Id("service").Qual(set.Service.Package.Path, set.Service.Name),
+			jen.Id("service").Qual(svc.Object.Pkg().Path(), svc.Object.Name()),
 			jen.Id("middleware").Op("...").Qual("github.com/go-kit/kit/endpoint", "Middleware"),
 		).
-		Params(jen.Id(endpointStructName)).
+		Params(jen.Id(endpointSetName)).
 		Block(
 			jen.Id("mw").
 				Op(":=").
@@ -137,31 +266,25 @@ func generateEndpointSet(code *jen.File, set EndpointSet, endpointNamesUnique bo
 				Call(jen.Id("middleware").Op("...")),
 			jen.Line(),
 			jen.Return(
-				jen.Id(endpointStructName).Values(endpointDict),
+				jen.Id(endpointSetName).Values(endpointSetDict),
 			),
 		)
 
 	if set.WithOpenCensus {
 		code.ImportAlias("github.com/go-kit/kit/tracing/opencensus", "kitoc")
 
-		endpointDict := jen.Dict{}
-		for _, endpoint := range set.Endpoints {
-			endpointDict[jen.Id(endpoint.Name)] = jen.Qual(
-				"github.com/go-kit/kit/tracing/opencensus",
-				"TraceEndpoint",
-			).
-				Call(jen.Lit(endpoint.OperationName)).
-				Call(jen.Id("endpoints").Dot(endpoint.Name))
-		}
-
 		code.Commentf(
 			"%s returns a(n) %s struct where each endpoint is wrapped with a tracing middleware.",
-			endpointTraceFactoryName,
-			endpointStructName,
+			endpointSetTraceFactoryName,
+			endpointSetName,
 		)
-		code.Func().Id(endpointTraceFactoryName).
-			Params(jen.Id("endpoints").Id(endpointStructName)).
-			Params(jen.Id(endpointStructName)).
-			Block(jen.Return(jen.Id(endpointStructName).Values(endpointDict)))
+		code.Func().Id(endpointSetTraceFactoryName).
+			Params(jen.Id("endpoints").Id(endpointSetName)).
+			Params(jen.Id(endpointSetName)).
+			Block(jen.Return(jen.Id(endpointSetName).Values(endpointSetTraceDict)))
+	}
+
+	for _, endpointCode := range endpoints {
+		code.Add(endpointCode)
 	}
 }

@@ -112,14 +112,29 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			return
 		}
 
-		svc, err := endpoint.ParseInterface(root.TypesInfo.ObjectOf(info.RawSpec.Name))
-		if err != nil {
-			root.AddError(err)
+		if !types.IsInterface(typeInfo) {
+			root.AddError(loader.ErrFromNode(fmt.Errorf("%s is not an interface", info.Name), info.RawSpec))
 
 			return
 		}
 
-		endpointSets = append(endpointSets, endpoint.EndpointSetFromService(svc, endpoint.GeneratorOptions(marker)))
+		named, ok := typeInfo.(*types.Named)
+		if !ok {
+			root.AddError(loader.ErrFromNode(fmt.Errorf("%s is not a named type", info.Name), info.RawSpec))
+
+			return
+		}
+
+		endpointSets = append(
+			endpointSets,
+			endpoint.EndpointSet{
+				Service: endpoint.Service{
+					Object: named.Obj(),
+					Type:   named.Underlying().(*types.Interface),
+				},
+				WithOpenCensus: marker.WithOpenCensus,
+			},
+		)
 	})
 	if err != nil {
 		root.AddError(err)
