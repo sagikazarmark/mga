@@ -5,13 +5,13 @@ import (
 )
 
 type Service interface {
-	Call(ctx context.Context, param string) (id string, err error)
+	CreateTodo(ctx context.Context, text string) (id string, err error)
 }
 
 type OtherService interface {
-	Call(ctx context.Context) (err error)
+	CreateTodo(ctx context.Context) (err error)
 }
 
 type Another interface {
-	Call(ctx context.Context) (err error)
+	CreateTodo(ctx context.Context) (err error)
 }

@@ -5,5 +5,5 @@ import (
 )
 
 type Service interface {
-	Call(context.Context, string) (string, error)
+	CreateTodo(context.Context, string) (string, error)
 }

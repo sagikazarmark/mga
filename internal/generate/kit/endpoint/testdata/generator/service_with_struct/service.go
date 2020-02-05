@@ -4,14 +4,14 @@ import (
 	"context"
 )
 
-type Request struct {
-	Param string
+type NewTodo struct {
+	Text string
 }
 
-type Response struct {
+type CreatedTodo struct {
 	ID string
 }
 
 type Service interface {
-	Call(ctx context.Context, req Request) (response Response, err error)
+	CreateTodo(ctx context.Context, newTodo NewTodo) (response CreatedTodo, err error)
 }

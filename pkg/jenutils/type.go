@@ -42,10 +42,10 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 		return Type(stmt.Index(jen.Lit(t.Len())), t.Elem())
 
 	case *types.Slice:
-		return Type(stmt, t.Elem())
+		return Type(stmt.Index(), t.Elem())
 
 	case *types.Chan:
-		return Type(stmt, t.Elem())
+		return Type(stmt.Chan(), t.Elem())
 
 	case *types.Map:
 		return Type(stmt.Map(Type(&jen.Statement{}, t.Key())), t.Elem())

@@ -210,8 +210,12 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 								jen.Error(),
 							).
 							Block(
-								jen.Id("req").Op(":=").Id("request").Assert(jen.Op("*").Id(requestName)),
-								jen.Line(),
+								jen.Do(func(s *jen.Statement) {
+									if len(callParams) > 0 {
+										s.Id("req").Op(":=").Id("request").Assert(jen.Op("*").Id(requestName))
+										s.Line()
+									}
+								}),
 								returnValues.Op(":=").Id("service").Dot(endpointName).Call(
 									append([]jen.Code{jen.Id("ctx")}, callParams...)...,
 								),

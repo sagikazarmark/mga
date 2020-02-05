@@ -27,7 +27,7 @@ type endpointError interface {
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type Endpoints struct {
-	Call endpoint.Endpoint
+	CreateTodo endpoint.Endpoint
 }
 
 // MakeEndpoints returns a(n) Endpoints struct where each endpoint invokes
@@ -35,47 +35,47 @@ type Endpoints struct {
 func MakeEndpoints(service multiple_services.Service, middleware ...endpoint.Middleware) Endpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return Endpoints{Call: kitxendpoint.OperationNameMiddleware("multiple_services.Call")(mw(MakeCallEndpoint(service)))}
+	return Endpoints{CreateTodo: kitxendpoint.OperationNameMiddleware("multiple_services.CreateTodo")(mw(MakeCreateTodoEndpoint(service)))}
 }
 
 // TraceEndpoints returns a(n) Endpoints struct where each endpoint is wrapped with a tracing middleware.
 func TraceEndpoints(endpoints Endpoints) Endpoints {
-	return Endpoints{Call: kitoc.TraceEndpoint("multiple_services.Call")(endpoints.Call)}
+	return Endpoints{CreateTodo: kitoc.TraceEndpoint("multiple_services.CreateTodo")(endpoints.CreateTodo)}
 }
 
-// CallRequest is a request struct for Call endpoint.
-type CallRequest struct {
-	Param string
+// CreateTodoRequest is a request struct for CreateTodo endpoint.
+type CreateTodoRequest struct {
+	Text string
 }
 
-// CallResponse is a response struct for Call endpoint.
-type CallResponse struct {
+// CreateTodoResponse is a response struct for CreateTodo endpoint.
+type CreateTodoResponse struct {
 	Id  string
 	Err error
 }
 
-// MakeCallEndpoint returns an endpoint for the matching method of the underlying service.
-func MakeCallEndpoint(service multiple_services.Service) endpoint.Endpoint {
+// MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeCreateTodoEndpoint(service multiple_services.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CallRequest)
+		req := request.(*CreateTodoRequest)
 
-		id, err := service.Call(ctx, req.Param)
+		id, err := service.CreateTodo(ctx, req.Text)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CallResponse{
+				return &CreateTodoResponse{
 					Err: err,
 					Id:  id,
 				}, err
 			}
 
-			return &CallResponse{
+			return &CreateTodoResponse{
 				Err: err,
 				Id:  id,
 			}, nil
 		}
 
-		return &CallResponse{Id: id}, nil
+		return &CreateTodoResponse{Id: id}, nil
 	}
 }
 
@@ -83,7 +83,7 @@ func MakeCallEndpoint(service multiple_services.Service) endpoint.Endpoint {
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type OtherEndpoints struct {
-	Call endpoint.Endpoint
+	CreateTodo endpoint.Endpoint
 }
 
 // MakeOtherEndpoints returns a(n) OtherEndpoints struct where each endpoint invokes
@@ -91,38 +91,36 @@ type OtherEndpoints struct {
 func MakeOtherEndpoints(service multiple_services.OtherService, middleware ...endpoint.Middleware) OtherEndpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return OtherEndpoints{Call: kitxendpoint.OperationNameMiddleware("multiple_services.Other.Call")(mw(MakeCallOtherEndpoint(service)))}
+	return OtherEndpoints{CreateTodo: kitxendpoint.OperationNameMiddleware("multiple_services.Other.CreateTodo")(mw(MakeCreateTodoOtherEndpoint(service)))}
 }
 
 // TraceOtherEndpoints returns a(n) OtherEndpoints struct where each endpoint is wrapped with a tracing middleware.
 func TraceOtherEndpoints(endpoints OtherEndpoints) OtherEndpoints {
-	return OtherEndpoints{Call: kitoc.TraceEndpoint("multiple_services.Other.Call")(endpoints.Call)}
+	return OtherEndpoints{CreateTodo: kitoc.TraceEndpoint("multiple_services.Other.CreateTodo")(endpoints.CreateTodo)}
 }
 
-// CallOtherRequest is a request struct for Call endpoint.
-type CallOtherRequest struct{}
+// CreateTodoOtherRequest is a request struct for CreateTodo endpoint.
+type CreateTodoOtherRequest struct{}
 
-// CallOtherResponse is a response struct for Call endpoint.
-type CallOtherResponse struct {
+// CreateTodoOtherResponse is a response struct for CreateTodo endpoint.
+type CreateTodoOtherResponse struct {
 	Err error
 }
 
-// MakeCallOtherEndpoint returns an endpoint for the matching method of the underlying service.
-func MakeCallOtherEndpoint(service multiple_services.OtherService) endpoint.Endpoint {
+// MakeCreateTodoOtherEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeCreateTodoOtherEndpoint(service multiple_services.OtherService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CallOtherRequest)
-
-		err := service.Call(ctx)
+		err := service.CreateTodo(ctx)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CallOtherResponse{Err: err}, err
+				return &CreateTodoOtherResponse{Err: err}, err
 			}
 
-			return &CallOtherResponse{Err: err}, nil
+			return &CreateTodoOtherResponse{Err: err}, nil
 		}
 
-		return &CallOtherResponse{}, nil
+		return &CreateTodoOtherResponse{}, nil
 	}
 }
 
@@ -130,7 +128,7 @@ func MakeCallOtherEndpoint(service multiple_services.OtherService) endpoint.Endp
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type AnotherEndpoints struct {
-	Call endpoint.Endpoint
+	CreateTodo endpoint.Endpoint
 }
 
 // MakeAnotherEndpoints returns a(n) AnotherEndpoints struct where each endpoint invokes
@@ -138,37 +136,35 @@ type AnotherEndpoints struct {
 func MakeAnotherEndpoints(service multiple_services.Another, middleware ...endpoint.Middleware) AnotherEndpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return AnotherEndpoints{Call: kitxendpoint.OperationNameMiddleware("multiple_services.Another.Call")(mw(MakeCallAnotherEndpoint(service)))}
+	return AnotherEndpoints{CreateTodo: kitxendpoint.OperationNameMiddleware("multiple_services.Another.CreateTodo")(mw(MakeCreateTodoAnotherEndpoint(service)))}
 }
 
 // TraceAnotherEndpoints returns a(n) AnotherEndpoints struct where each endpoint is wrapped with a tracing middleware.
 func TraceAnotherEndpoints(endpoints AnotherEndpoints) AnotherEndpoints {
-	return AnotherEndpoints{Call: kitoc.TraceEndpoint("multiple_services.Another.Call")(endpoints.Call)}
+	return AnotherEndpoints{CreateTodo: kitoc.TraceEndpoint("multiple_services.Another.CreateTodo")(endpoints.CreateTodo)}
 }
 
-// CallAnotherRequest is a request struct for Call endpoint.
-type CallAnotherRequest struct{}
+// CreateTodoAnotherRequest is a request struct for CreateTodo endpoint.
+type CreateTodoAnotherRequest struct{}
 
-// CallAnotherResponse is a response struct for Call endpoint.
-type CallAnotherResponse struct {
+// CreateTodoAnotherResponse is a response struct for CreateTodo endpoint.
+type CreateTodoAnotherResponse struct {
 	Err error
 }
 
-// MakeCallAnotherEndpoint returns an endpoint for the matching method of the underlying service.
-func MakeCallAnotherEndpoint(service multiple_services.Another) endpoint.Endpoint {
+// MakeCreateTodoAnotherEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeCreateTodoAnotherEndpoint(service multiple_services.Another) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CallAnotherRequest)
-
-		err := service.Call(ctx)
+		err := service.CreateTodo(ctx)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CallAnotherResponse{Err: err}, err
+				return &CreateTodoAnotherResponse{Err: err}, err
 			}
 
-			return &CallAnotherResponse{Err: err}, nil
+			return &CreateTodoAnotherResponse{Err: err}, nil
 		}
 
-		return &CallAnotherResponse{}, nil
+		return &CreateTodoAnotherResponse{}, nil
 	}
 }

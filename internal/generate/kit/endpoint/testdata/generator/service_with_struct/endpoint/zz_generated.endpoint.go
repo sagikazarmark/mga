@@ -27,7 +27,7 @@ type endpointError interface {
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type Endpoints struct {
-	Call endpoint.Endpoint
+	CreateTodo endpoint.Endpoint
 }
 
 // MakeEndpoints returns a(n) Endpoints struct where each endpoint invokes
@@ -35,46 +35,46 @@ type Endpoints struct {
 func MakeEndpoints(service service_with_struct.Service, middleware ...endpoint.Middleware) Endpoints {
 	mw := kitxendpoint.Combine(middleware...)
 
-	return Endpoints{Call: kitxendpoint.OperationNameMiddleware("service_with_struct.Call")(mw(MakeCallEndpoint(service)))}
+	return Endpoints{CreateTodo: kitxendpoint.OperationNameMiddleware("service_with_struct.CreateTodo")(mw(MakeCreateTodoEndpoint(service)))}
 }
 
 // TraceEndpoints returns a(n) Endpoints struct where each endpoint is wrapped with a tracing middleware.
 func TraceEndpoints(endpoints Endpoints) Endpoints {
-	return Endpoints{Call: kitoc.TraceEndpoint("service_with_struct.Call")(endpoints.Call)}
+	return Endpoints{CreateTodo: kitoc.TraceEndpoint("service_with_struct.CreateTodo")(endpoints.CreateTodo)}
 }
 
-// CallRequest is a request struct for Call endpoint.
-type CallRequest struct {
-	Req service_with_struct.Request
+// CreateTodoRequest is a request struct for CreateTodo endpoint.
+type CreateTodoRequest struct {
+	NewTodo service_with_struct.NewTodo
 }
 
-// CallResponse is a response struct for Call endpoint.
-type CallResponse struct {
-	Response service_with_struct.Response
+// CreateTodoResponse is a response struct for CreateTodo endpoint.
+type CreateTodoResponse struct {
+	Response service_with_struct.CreatedTodo
 	Err      error
 }
 
-// MakeCallEndpoint returns an endpoint for the matching method of the underlying service.
-func MakeCallEndpoint(service service_with_struct.Service) endpoint.Endpoint {
+// MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
+func MakeCreateTodoEndpoint(service service_with_struct.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CallRequest)
+		req := request.(*CreateTodoRequest)
 
-		response, err := service.Call(ctx, req.Req)
+		response, err := service.CreateTodo(ctx, req.NewTodo)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CallResponse{
+				return &CreateTodoResponse{
 					Err:      err,
 					Response: response,
 				}, err
 			}
 
-			return &CallResponse{
+			return &CreateTodoResponse{
 				Err:      err,
 				Response: response,
 			}, nil
 		}
 
-		return &CallResponse{Response: response}, nil
+		return &CreateTodoResponse{Response: response}, nil
 	}
 }

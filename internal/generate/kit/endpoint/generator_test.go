@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+	"fmt"
 	"go/types"
 	"io/ioutil"
 	"testing"
@@ -12,88 +13,69 @@ import (
 	"sagikazarmark.dev/mga/pkg/gentypes"
 )
 
-func TestGenerate_SimpleService(t *testing.T) {
-	pkgs, err := loader.LoadRoots("./testdata/generator/simple_service")
-	require.NoError(t, err)
+func TestGenerate(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "simple_service",
+		},
+		{
+			name: "service_with_struct",
+		},
+		{
+			name: "unnamed_param",
+		},
+		{
+			name: "todo",
+		},
+	}
 
-	pkg := pkgs[0]
+	for _, test := range tests {
+		test := test
 
-	pkg.NeedTypesInfo()
+		t.Run(test.name, func(t *testing.T) {
+			pkgs, err := loader.LoadRoots(fmt.Sprintf("./testdata/generator/%s", test.name))
+			require.NoError(t, err)
 
-	service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
+			pkg := pkgs[0]
 
-	file := File{
-		File: gentypes.File{
-			HeaderText: `// Copyright 2020 Acme Inc.
+			pkg.NeedTypesInfo()
+
+			service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
+
+			file := File{
+				File: gentypes.File{
+					HeaderText: `// Copyright 2020 Acme Inc.
 // All rights reserved.
 //
 // Licensed under "Only for testing purposes" license.
 `,
-			Package: gentypes.PackageRef{
-				Name: "pkgdriver",
-				Path: "app.dev/pkg/pkdriver",
-			},
-		},
-		EndpointSets: []EndpointSet{
-			{
-				Service: Service{
-					Object: service.Obj(),
-					Type:   service.Underlying().(*types.Interface),
+					Package: gentypes.PackageRef{
+						Name: "pkgdriver",
+						Path: "app.dev/pkg/pkdriver",
+					},
 				},
-				WithOpenCensus: true,
-			},
-		},
-	}
-
-	expected, err := ioutil.ReadFile("./testdata/generator/simple_service/endpoint/zz_generated.endpoint.go")
-	require.NoError(t, err)
-
-	actual, err := Generate(file)
-	require.NoError(t, err)
-
-	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
-}
-
-func TestGenerate_ServiceWithStruct(t *testing.T) {
-	pkgs, err := loader.LoadRoots("./testdata/generator/service_with_struct")
-	require.NoError(t, err)
-
-	pkg := pkgs[0]
-
-	pkg.NeedTypesInfo()
-
-	service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
-
-	file := File{
-		File: gentypes.File{
-			HeaderText: `// Copyright 2020 Acme Inc.
-// All rights reserved.
-//
-// Licensed under "Only for testing purposes" license.
-`,
-			Package: gentypes.PackageRef{
-				Name: "pkgdriver",
-				Path: "app.dev/pkg/pkdriver",
-			},
-		},
-		EndpointSets: []EndpointSet{
-			{
-				Service: Service{
-					Object: service.Obj(),
-					Type:   service.Underlying().(*types.Interface),
+				EndpointSets: []EndpointSet{
+					{
+						Service: Service{
+							Object: service.Obj(),
+							Type:   service.Underlying().(*types.Interface),
+						},
+						WithOpenCensus: true,
+					},
 				},
-				WithOpenCensus: true,
-			},
-		},
+			}
+
+			expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/generator/%s/endpoint/zz_generated.endpoint.go", test.name))
+			require.NoError(t, err)
+
+			actual, err := Generate(file)
+			require.NoError(t, err)
+
+			assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
+		})
 	}
-
-	expected, err := ioutil.ReadFile("./testdata/generator/service_with_struct/endpoint/zz_generated.endpoint.go")
-	require.NoError(t, err)
-
-	actual, err := Generate(file)
-	require.NoError(t, err)
-
-	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
 }
 
 func TestGenerate_MultipleServices(t *testing.T) {
@@ -146,48 +128,6 @@ func TestGenerate_MultipleServices(t *testing.T) {
 	}
 
 	expected, err := ioutil.ReadFile("./testdata/generator/multiple_services/endpoint/zz_generated.endpoint.go")
-	require.NoError(t, err)
-
-	actual, err := Generate(file)
-	require.NoError(t, err)
-
-	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
-}
-
-func TestGenerate_UnnamedParam(t *testing.T) {
-	pkgs, err := loader.LoadRoots("./testdata/generator/unnamed_param")
-	require.NoError(t, err)
-
-	pkg := pkgs[0]
-
-	pkg.NeedTypesInfo()
-
-	service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
-
-	file := File{
-		File: gentypes.File{
-			HeaderText: `// Copyright 2020 Acme Inc.
-// All rights reserved.
-//
-// Licensed under "Only for testing purposes" license.
-`,
-			Package: gentypes.PackageRef{
-				Name: "pkgdriver",
-				Path: "app.dev/pkg/pkdriver",
-			},
-		},
-		EndpointSets: []EndpointSet{
-			{
-				Service: Service{
-					Object: service.Obj(),
-					Type:   service.Underlying().(*types.Interface),
-				},
-				WithOpenCensus: true,
-			},
-		},
-	}
-
-	expected, err := ioutil.ReadFile("./testdata/generator/unnamed_param/endpoint/zz_generated.endpoint.go")
 	require.NoError(t, err)
 
 	actual, err := Generate(file)
