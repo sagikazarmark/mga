@@ -30,7 +30,7 @@ type Marker struct {
 	// When not specified falls back to base name created from the service name.
 	BaseName string `marker:"baseName,optional"`
 
-	// ModuleName can be used instead of the package name as an operation name to uniquely identify a service call.
+	// ModuleName can be used instead of the package name in an operation name to uniquely identify a service call.
 	//
 	// Falls back to the package name.
 	ModuleName string `marker:"moduleName,optional"`
@@ -132,6 +132,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 					Object: named.Obj(),
 					Type:   named.Underlying().(*types.Interface),
 				},
+				ModuleName:     marker.ModuleName,
 				WithOpenCensus: marker.WithOpenCensus,
 			},
 		)

@@ -26,6 +26,11 @@ type File struct {
 type EndpointSet struct {
 	Service Service
 
+	// ModuleName can be used instead of the package name in an operation name to uniquely identify a service call.
+	//
+	// Falls back to the package name.
+	ModuleName string
+
 	// WithOpenCensus enables generating a trace middleware for the endpoint set.
 	WithOpenCensus bool
 }
@@ -78,6 +83,11 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 
 	name := strings.TrimSuffix(svc.Object.Name(), "Service")
 
+	moduleName := set.ModuleName
+	if moduleName == "" {
+		moduleName = svc.Object.Pkg().Name()
+	}
+
 	endpointSetName := fmt.Sprintf("%sEndpoints", name)
 	endpointSetFactoryName := fmt.Sprintf("Make%sEndpoints", name)
 	endpointSetTraceFactoryName := fmt.Sprintf("Trace%sEndpoints", name)
@@ -94,9 +104,9 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 
 		var operationName string
 		if name == "" {
-			operationName = fmt.Sprintf("%s.%s", svc.Object.Pkg().Name(), endpointName)
+			operationName = fmt.Sprintf("%s.%s", moduleName, endpointName)
 		} else {
-			operationName = fmt.Sprintf("%s.%s.%s", svc.Object.Pkg().Name(), name, endpointName)
+			operationName = fmt.Sprintf("%s.%s.%s", moduleName, name, endpointName)
 		}
 
 		// Ignore unexported methods

@@ -18,16 +18,16 @@ func TestGenerate(t *testing.T) {
 		name string
 	}{
 		{
-			name: "simple_service",
-		},
-		{
 			name: "service_with_struct",
 		},
 		{
-			name: "unnamed_param",
+			name: "simple_service",
 		},
 		{
 			name: "todo",
+		},
+		{
+			name: "unnamed_param",
 		},
 	}
 
@@ -76,6 +76,49 @@ func TestGenerate(t *testing.T) {
 			assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
 		})
 	}
+}
+
+func TestGenerate_CustomModule(t *testing.T) {
+	pkgs, err := loader.LoadRoots("./testdata/generator/custom_module")
+	require.NoError(t, err)
+
+	pkg := pkgs[0]
+
+	pkg.NeedTypesInfo()
+
+	service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
+
+	file := File{
+		File: gentypes.File{
+			HeaderText: `// Copyright 2020 Acme Inc.
+// All rights reserved.
+//
+// Licensed under "Only for testing purposes" license.
+`,
+			Package: gentypes.PackageRef{
+				Name: "pkgdriver",
+				Path: "app.dev/pkg/pkdriver",
+			},
+		},
+		EndpointSets: []EndpointSet{
+			{
+				Service: Service{
+					Object: service.Obj(),
+					Type:   service.Underlying().(*types.Interface),
+				},
+				ModuleName:     "path.to.custom_module",
+				WithOpenCensus: true,
+			},
+		},
+	}
+
+	expected, err := ioutil.ReadFile("./testdata/generator/custom_module/endpoint/zz_generated.endpoint.go")
+	require.NoError(t, err)
+
+	actual, err := Generate(file)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
 }
 
 func TestGenerate_MultipleServices(t *testing.T) {
