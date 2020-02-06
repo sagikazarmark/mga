@@ -54,31 +54,31 @@ type CreateTodoResponse struct {
 	Err error
 }
 
-func (r *CreateTodoResponse) Failed() error {
+func (r CreateTodoResponse) Failed() error {
 	return r.Err
 }
 
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service unnamed_param.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CreateTodoRequest)
+		req := request.(CreateTodoRequest)
 
 		r0, err := service.CreateTodo(ctx, req.P0)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CreateTodoResponse{
+				return CreateTodoResponse{
 					Err: err,
 					R0:  r0,
 				}, err
 			}
 
-			return &CreateTodoResponse{
+			return CreateTodoResponse{
 				Err: err,
 				R0:  r0,
 			}, nil
 		}
 
-		return &CreateTodoResponse{R0: r0}, nil
+		return CreateTodoResponse{R0: r0}, nil
 	}
 }
