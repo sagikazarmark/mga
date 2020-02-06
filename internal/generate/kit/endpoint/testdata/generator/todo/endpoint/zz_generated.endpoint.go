@@ -64,6 +64,10 @@ type CreateTodoResponse struct {
 	Err error
 }
 
+func (r *CreateTodoResponse) Failed() error {
+	return r.Err
+}
+
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service todo.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -98,6 +102,10 @@ type ListTodosResponse struct {
 	Err error
 }
 
+func (r *ListTodosResponse) Failed() error {
+	return r.Err
+}
+
 // MakeListTodosEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeListTodosEndpoint(service todo.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -129,6 +137,10 @@ type MarkAsDoneRequest struct {
 // MarkAsDoneResponse is a response struct for MarkAsDone endpoint.
 type MarkAsDoneResponse struct {
 	Err error
+}
+
+func (r *MarkAsDoneResponse) Failed() error {
+	return r.Err
 }
 
 // MakeMarkAsDoneEndpoint returns an endpoint for the matching method of the underlying service.

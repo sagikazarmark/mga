@@ -199,6 +199,11 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 				endpoints,
 				jen.Commentf("%s is a response struct for %s endpoint.", responseName, endpointName),
 				jen.Type().Id(responseName).Struct(fields...),
+				jen.Func().Params(
+					jen.Id("r ").Op("*").Id(responseName),
+				).Id("Failed").Params().Error().Block(
+					jen.Return(jen.Id("r").Dot("Err")),
+				),
 			)
 		}
 
