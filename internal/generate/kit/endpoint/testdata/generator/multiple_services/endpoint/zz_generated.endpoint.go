@@ -54,32 +54,32 @@ type CreateTodoResponse struct {
 	Err error
 }
 
-func (r *CreateTodoResponse) Failed() error {
+func (r CreateTodoResponse) Failed() error {
 	return r.Err
 }
 
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service multiple_services.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CreateTodoRequest)
+		req := request.(CreateTodoRequest)
 
 		id, err := service.CreateTodo(ctx, req.Text)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CreateTodoResponse{
+				return CreateTodoResponse{
 					Err: err,
 					Id:  id,
 				}, err
 			}
 
-			return &CreateTodoResponse{
+			return CreateTodoResponse{
 				Err: err,
 				Id:  id,
 			}, nil
 		}
 
-		return &CreateTodoResponse{Id: id}, nil
+		return CreateTodoResponse{Id: id}, nil
 	}
 }
 
@@ -111,7 +111,7 @@ type CreateTodoOtherResponse struct {
 	Err error
 }
 
-func (r *CreateTodoOtherResponse) Failed() error {
+func (r CreateTodoOtherResponse) Failed() error {
 	return r.Err
 }
 
@@ -122,13 +122,13 @@ func MakeCreateTodoOtherEndpoint(service multiple_services.OtherService) endpoin
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CreateTodoOtherResponse{Err: err}, err
+				return CreateTodoOtherResponse{Err: err}, err
 			}
 
-			return &CreateTodoOtherResponse{Err: err}, nil
+			return CreateTodoOtherResponse{Err: err}, nil
 		}
 
-		return &CreateTodoOtherResponse{}, nil
+		return CreateTodoOtherResponse{}, nil
 	}
 }
 
@@ -160,7 +160,7 @@ type CreateTodoAnotherResponse struct {
 	Err error
 }
 
-func (r *CreateTodoAnotherResponse) Failed() error {
+func (r CreateTodoAnotherResponse) Failed() error {
 	return r.Err
 }
 
@@ -171,12 +171,12 @@ func MakeCreateTodoAnotherEndpoint(service multiple_services.Another) endpoint.E
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CreateTodoAnotherResponse{Err: err}, err
+				return CreateTodoAnotherResponse{Err: err}, err
 			}
 
-			return &CreateTodoAnotherResponse{Err: err}, nil
+			return CreateTodoAnotherResponse{Err: err}, nil
 		}
 
-		return &CreateTodoAnotherResponse{}, nil
+		return CreateTodoAnotherResponse{}, nil
 	}
 }

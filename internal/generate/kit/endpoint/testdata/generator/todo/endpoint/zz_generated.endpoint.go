@@ -64,32 +64,32 @@ type CreateTodoResponse struct {
 	Err error
 }
 
-func (r *CreateTodoResponse) Failed() error {
+func (r CreateTodoResponse) Failed() error {
 	return r.Err
 }
 
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service todo.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*CreateTodoRequest)
+		req := request.(CreateTodoRequest)
 
 		id, err := service.CreateTodo(ctx, req.Text)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &CreateTodoResponse{
+				return CreateTodoResponse{
 					Err: err,
 					Id:  id,
 				}, err
 			}
 
-			return &CreateTodoResponse{
+			return CreateTodoResponse{
 				Err: err,
 				Id:  id,
 			}, nil
 		}
 
-		return &CreateTodoResponse{Id: id}, nil
+		return CreateTodoResponse{Id: id}, nil
 	}
 }
 
@@ -102,7 +102,7 @@ type ListTodosResponse struct {
 	Err error
 }
 
-func (r *ListTodosResponse) Failed() error {
+func (r ListTodosResponse) Failed() error {
 	return r.Err
 }
 
@@ -113,19 +113,19 @@ func MakeListTodosEndpoint(service todo.Service) endpoint.Endpoint {
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &ListTodosResponse{
+				return ListTodosResponse{
 					Err: err,
 					R0:  r0,
 				}, err
 			}
 
-			return &ListTodosResponse{
+			return ListTodosResponse{
 				Err: err,
 				R0:  r0,
 			}, nil
 		}
 
-		return &ListTodosResponse{R0: r0}, nil
+		return ListTodosResponse{R0: r0}, nil
 	}
 }
 
@@ -139,25 +139,25 @@ type MarkAsDoneResponse struct {
 	Err error
 }
 
-func (r *MarkAsDoneResponse) Failed() error {
+func (r MarkAsDoneResponse) Failed() error {
 	return r.Err
 }
 
 // MakeMarkAsDoneEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeMarkAsDoneEndpoint(service todo.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(*MarkAsDoneRequest)
+		req := request.(MarkAsDoneRequest)
 
 		err := service.MarkAsDone(ctx, req.Id)
 
 		if err != nil {
 			if endpointErr := endpointError(nil); errors.As(err, &endpointErr) && endpointErr.EndpointError() {
-				return &MarkAsDoneResponse{Err: err}, err
+				return MarkAsDoneResponse{Err: err}, err
 			}
 
-			return &MarkAsDoneResponse{Err: err}, nil
+			return MarkAsDoneResponse{Err: err}, nil
 		}
 
-		return &MarkAsDoneResponse{}, nil
+		return MarkAsDoneResponse{}, nil
 	}
 }

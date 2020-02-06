@@ -200,7 +200,7 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 				jen.Commentf("%s is a response struct for %s endpoint.", responseName, endpointName),
 				jen.Type().Id(responseName).Struct(fields...),
 				jen.Func().Params(
-					jen.Id("r ").Op("*").Id(responseName),
+					jen.Id("r ").Id(responseName),
 				).Id("Failed").Params().Error().Block(
 					jen.Return(jen.Id("r").Dot("Err")),
 				),
@@ -227,7 +227,7 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 							Block(
 								jen.Do(func(s *jen.Statement) {
 									if len(callParams) > 0 {
-										s.Id("req").Op(":=").Id("request").Assert(jen.Op("*").Id(requestName))
+										s.Id("req").Op(":=").Id("request").Assert(jen.Id(requestName))
 										s.Line()
 									}
 								}),
@@ -244,19 +244,19 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 										).Op("&&").Id("endpointErr").Dot("EndpointError").Call(),
 									).Block(
 										jen.Return(
-											jen.Op("&").Id(responseName).Values(responseErrorDict),
+											jen.Id(responseName).Values(responseErrorDict),
 											jen.Err(),
 										),
 									),
 									jen.Line(),
 									jen.Return(
-										jen.Op("&").Id(responseName).Values(responseErrorDict),
+										jen.Id(responseName).Values(responseErrorDict),
 										jen.Nil(),
 									),
 								),
 								jen.Line(),
 								jen.Return(
-									jen.Op("&").Id(responseName).Values(responseDict),
+									jen.Id(responseName).Values(responseDict),
 									jen.Nil(),
 								),
 							),
