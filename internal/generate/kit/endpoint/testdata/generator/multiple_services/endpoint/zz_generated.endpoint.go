@@ -54,6 +54,10 @@ type CreateTodoResponse struct {
 	Err error
 }
 
+func (r *CreateTodoResponse) Failed() error {
+	return r.Err
+}
+
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service multiple_services.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -107,6 +111,10 @@ type CreateTodoOtherResponse struct {
 	Err error
 }
 
+func (r *CreateTodoOtherResponse) Failed() error {
+	return r.Err
+}
+
 // MakeCreateTodoOtherEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoOtherEndpoint(service multiple_services.OtherService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -150,6 +158,10 @@ type CreateTodoAnotherRequest struct{}
 // CreateTodoAnotherResponse is a response struct for CreateTodo endpoint.
 type CreateTodoAnotherResponse struct {
 	Err error
+}
+
+func (r *CreateTodoAnotherResponse) Failed() error {
+	return r.Err
 }
 
 // MakeCreateTodoAnotherEndpoint returns an endpoint for the matching method of the underlying service.

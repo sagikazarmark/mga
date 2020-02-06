@@ -54,6 +54,10 @@ type CreateTodoResponse struct {
 	Err error
 }
 
+func (r *CreateTodoResponse) Failed() error {
+	return r.Err
+}
+
 // MakeCreateTodoEndpoint returns an endpoint for the matching method of the underlying service.
 func MakeCreateTodoEndpoint(service simple_service.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
