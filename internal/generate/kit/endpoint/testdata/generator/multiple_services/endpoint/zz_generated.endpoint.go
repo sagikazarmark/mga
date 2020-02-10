@@ -18,9 +18,14 @@ import (
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint/testdata/generator/multiple_services"
 )
 
-// endpointError identifies an error that should be returned as an error endpoint.
+// endpointError identifies an error that should be returned as an endpoint error.
 type endpointError interface {
 	EndpointError() bool
+}
+
+// serviceError identifies an error that should be returned as a service error.
+type serviceError interface {
+	ServiceError() bool
 }
 
 // Endpoints collects all of the endpoints that compose the underlying service. It's

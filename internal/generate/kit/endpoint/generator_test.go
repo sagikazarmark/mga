@@ -178,3 +178,46 @@ func TestGenerate_MultipleServices(t *testing.T) {
 
 	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
 }
+
+func TestGenerate_ServiceError(t *testing.T) {
+	pkgs, err := loader.LoadRoots("./testdata/generator/service_error")
+	require.NoError(t, err)
+
+	pkg := pkgs[0]
+
+	pkg.NeedTypesInfo()
+
+	service := pkg.Types.Scope().Lookup("Service").Type().(*types.Named)
+
+	file := File{
+		File: gentypes.File{
+			HeaderText: `// Copyright 2020 Acme Inc.
+// All rights reserved.
+//
+// Licensed under "Only for testing purposes" license.
+`,
+			Package: gentypes.PackageRef{
+				Name: "pkgdriver",
+				Path: "app.dev/pkg/pkdriver",
+			},
+		},
+		EndpointSets: []EndpointSet{
+			{
+				Service: Service{
+					Object: service.Obj(),
+					Type:   service.Underlying().(*types.Interface),
+				},
+				WithOpenCensus: true,
+				ErrorStrategy:  "service",
+			},
+		},
+	}
+
+	expected, err := ioutil.ReadFile("./testdata/generator/service_error/endpoint/zz_generated.endpoint.go")
+	require.NoError(t, err)
+
+	actual, err := Generate(file)
+	require.NoError(t, err)
+
+	assert.Equal(t, string(expected), string(actual), "the generated code does not match the expected")
+}

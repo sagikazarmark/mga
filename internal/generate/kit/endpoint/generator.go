@@ -33,6 +33,9 @@ type EndpointSet struct {
 
 	// WithOpenCensus enables generating a trace middleware for the endpoint set.
 	WithOpenCensus bool
+
+	// ErrorStrategy decides whether returned errors are checked for being endpoint or service errors.
+	ErrorStrategy string
 }
 
 // Service represents a service interface
@@ -56,9 +59,14 @@ func Generate(file File) ([]byte, error) {
 	code.ImportName("github.com/go-kit/kit/endpoint", "endpoint")
 	code.ImportAlias("github.com/sagikazarmark/kitx/endpoint", "kitxendpoint")
 
-	code.Comment("endpointError identifies an error that should be returned as an error endpoint.")
+	code.Comment("endpointError identifies an error that should be returned as an endpoint error.")
 	code.Type().Id("endpointError").Interface(
 		jen.Id("EndpointError").Params().Bool(),
+	)
+
+	code.Comment("serviceError identifies an error that should be returned as a service error.")
+	code.Type().Id("serviceError").Interface(
+		jen.Id("ServiceError").Params().Bool(),
 	)
 
 	for _, set := range file.EndpointSets {
@@ -236,23 +244,47 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 								),
 								jen.Line(),
 								jen.If(jen.Err().Op("!=").Nil()).Block(
-									jen.If(
-										jen.Id("endpointErr").Op(":=").Id("endpointError").Parens(jen.Nil()),
-										jen.Qual("errors", "As").Call(
-											jen.Err(),
-											jen.Op("&").Id("endpointErr"),
-										).Op("&&").Id("endpointErr").Dot("EndpointError").Call(),
-									).Block(
-										jen.Return(
-											jen.Id(responseName).Values(responseErrorDict),
-											jen.Err(),
-										),
-									),
-									jen.Line(),
-									jen.Return(
-										jen.Id(responseName).Values(responseErrorDict),
-										jen.Nil(),
-									),
+									jen.Do(func(s *jen.Statement) {
+										if strategy := strings.ToLower(set.ErrorStrategy); strategy == "service" {
+											s.If(
+												jen.Id("serviceErr").Op(":=").Id("serviceError").Parens(jen.Nil()),
+												jen.Qual("errors", "As").Call(
+													jen.Err(),
+													jen.Op("&").Id("serviceErr"),
+												).Op("&&").Id("serviceErr").Dot("ServiceError").Call(),
+											).Block(
+												jen.Return(
+													jen.Id(responseName).Values(responseErrorDict),
+													jen.Nil(),
+												),
+											).Line()
+
+											s.Line()
+											s.Return(
+												jen.Id(responseName).Values(responseErrorDict),
+												jen.Err(),
+											)
+										} else {
+											s.If(
+												jen.Id("endpointErr").Op(":=").Id("endpointError").Parens(jen.Nil()),
+												jen.Qual("errors", "As").Call(
+													jen.Err(),
+													jen.Op("&").Id("endpointErr"),
+												).Op("&&").Id("endpointErr").Dot("EndpointError").Call(),
+											).Block(
+												jen.Return(
+													jen.Id(responseName).Values(responseErrorDict),
+													jen.Err(),
+												),
+											).Line()
+
+											s.Line()
+											s.Return(
+												jen.Id(responseName).Values(responseErrorDict),
+												jen.Nil(),
+											)
+										}
+									}),
 								),
 								jen.Line(),
 								jen.Return(
