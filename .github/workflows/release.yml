@@ -21,7 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v1
 
-      - name: Release
-        run: make release
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v1
+        with:
+          version: v0.126.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

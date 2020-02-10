@@ -20,7 +20,6 @@ endif
 # Dependency versions
 GOTESTSUM_VERSION = 0.3.5
 GOLANGCI_VERSION = 1.20.0
-GORELEASER_VERSION = 0.119.0
 
 GOLANG_VERSION = 1.13
 
@@ -60,7 +59,7 @@ generate: ## Generate test code
 	go run sagikazarmark.dev/mga generate event dispatcher --output subpkg:suffix=gen ./...
 
 .PHONY: check
-check: test-all lint ## Run tests and linters
+check: test lint ## Run tests and linters
 
 bin/gotestsum: bin/gotestsum-${GOTESTSUM_VERSION}
 	@ln -sf gotestsum-${GOTESTSUM_VERSION} bin/gotestsum
@@ -69,18 +68,13 @@ bin/gotestsum-${GOTESTSUM_VERSION}:
 	curl -L https://github.com/gotestyourself/gotestsum/releases/download/v${GOTESTSUM_VERSION}/gotestsum_${GOTESTSUM_VERSION}_${OS}_amd64.tar.gz | tar -zOxf - gotestsum > ./bin/gotestsum-${GOTESTSUM_VERSION} && chmod +x ./bin/gotestsum-${GOTESTSUM_VERSION}
 
 TEST_PKGS ?= ./...
-TEST_REPORT_NAME ?= results.xml
 .PHONY: test
-test: TEST_REPORT ?= main
 test: TEST_FORMAT ?= short
 test: SHELL = /bin/bash
+test: export CGO_ENABLED=1
 test: bin/gotestsum ## Run tests
-	@mkdir -p ${BUILD_DIR}/test_results/${TEST_REPORT}
-	bin/gotestsum --no-summary=skipped --junitfile ${BUILD_DIR}/test_results/${TEST_REPORT}/${TEST_REPORT_NAME} --format ${TEST_FORMAT} -- $(filter-out -v,${GOARGS}) $(if ${TEST_PKGS},${TEST_PKGS},./...)
-
-.PHONY: test-all
-test-all: ## Run all tests
-	@${MAKE} GOARGS="${GOARGS} -run .\*" TEST_REPORT=all test
+	@mkdir -p ${BUILD_DIR}
+	bin/gotestsum --no-summary=skipped --junitfile ${BUILD_DIR}/coverage.xml --format ${TEST_FORMAT} -- -race -coverprofile=${BUILD_DIR}/coverage.txt -covermode=atomic $(filter-out -v,${GOARGS}) $(if ${TEST_PKGS},${TEST_PKGS},./...)
 
 bin/golangci-lint: bin/golangci-lint-${GOLANGCI_VERSION}
 	@ln -sf golangci-lint-${GOLANGCI_VERSION} bin/golangci-lint
@@ -93,13 +87,9 @@ bin/golangci-lint-${GOLANGCI_VERSION}:
 lint: bin/golangci-lint ## Run linter
 	bin/golangci-lint run
 
-bin/goreleaser: ## Install goreleaser
-	@mkdir -p ./bin/
-	curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | bash -s -- v${GORELEASER_VERSION}
-
-.PHONY: release
-release: bin/goreleaser ## Release current tag
-	@bin/goreleaser
+.PHONY: fix
+fix: bin/golangci-lint ## Fix lint violations
+	bin/golangci-lint run --fix
 
 release-%: TAG_PREFIX = v
 release-%:
