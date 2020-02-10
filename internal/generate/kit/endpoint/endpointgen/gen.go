@@ -137,6 +137,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 				},
 				ModuleName:     marker.ModuleName,
 				WithOpenCensus: marker.WithOpenCensus,
+				ErrorStrategy:  marker.ErrorStrategy,
 			},
 		)
 	})
