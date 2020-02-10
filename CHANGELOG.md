@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
+## [0.1.1] - 2020-02-10
+
+
 ## [0.1.0] - 2020-02-10
 
 
@@ -52,7 +55,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## 0.0.1 - 2019-09-09
 
 
-[Unreleased]: https://github.com/sagikazarmark/mga/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sagikazarmark/mga/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/sagikazarmark/mga/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/sagikazarmark/mga/compare/v0.0.13...v0.1.0
 [0.0.13]: https://github.com/sagikazarmark/mga/compare/v0.0.12...v0.0.13
 [0.0.12]: https://github.com/sagikazarmark/mga/compare/v0.0.11...v0.0.12
