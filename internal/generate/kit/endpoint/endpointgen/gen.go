@@ -37,6 +37,9 @@ type Marker struct {
 
 	// WithOpenCensus enables generating a TraceEndpoint middleware.
 	WithOpenCensus bool `marker:"withOpenCensus,optional"`
+
+	// ErrorStrategy decides whether returned errors are checked for being endpoint or service errors.
+	ErrorStrategy string `marker:"errorStrategy,optional"`
 }
 
 // Generator generates a Go kit Endpoint for a service.
