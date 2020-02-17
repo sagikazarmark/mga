@@ -56,6 +56,9 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 	case *types.Named:
 		return stmt.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
 
+	case *types.Pointer:
+		return Type(stmt.Op("*"), t.Elem())
+
 	case *types.Struct:
 		var fields []jen.Code
 

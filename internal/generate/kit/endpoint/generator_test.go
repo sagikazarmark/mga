@@ -29,6 +29,9 @@ func TestGenerate(t *testing.T) {
 		{
 			name: "unnamed_param",
 		},
+		{
+			name: "pointer_message",
+		},
 	}
 
 	for _, test := range tests {
