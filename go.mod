@@ -16,6 +16,6 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/vbauerster/mpb/v4 v4.11.2
 	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5
-	golang.org/x/tools v0.0.0-20200116062425-473961ec044c
+	golang.org/x/tools v0.0.0-20200216192241-b320d3a0f5a2
 	sigs.k8s.io/controller-tools v0.2.5
 )
