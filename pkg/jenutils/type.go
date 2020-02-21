@@ -54,7 +54,12 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 		return stmt.Interface()
 
 	case *types.Named:
-		return stmt.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
+		if pkg := t.Obj().Pkg(); pkg != nil {
+			return stmt.Qual(pkg.Path(), t.Obj().Name())
+		}
+
+		// builtin interfaces (eg. error) have no package
+		return stmt.Id(t.Obj().Name())
 
 	case *types.Pointer:
 		return Type(stmt.Op("*"), t.Elem())
