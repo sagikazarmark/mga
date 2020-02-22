@@ -4,7 +4,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"golang.org/x/tools/go/packages"
 	"sigs.k8s.io/controller-tools/pkg/genall"
+	"sigs.k8s.io/controller-tools/pkg/loader"
+	"sigs.k8s.io/controller-tools/pkg/markers"
 
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint/endpointgen"
 	"sagikazarmark.dev/mga/pkg/genutils"
@@ -69,7 +72,8 @@ func runEndpoint(options endpointOptions) error {
 		options.paths = []string{"."}
 	}
 
-	runtime, err := generators.ForRoots(options.paths...)
+	runtime, err := forRoots(generators, options.paths...)
+	// runtime, err := generators.ForRoots(options.paths...)
 	if err != nil {
 		return err
 	}
@@ -86,4 +90,35 @@ func runEndpoint(options endpointOptions) error {
 	}
 
 	return nil
+}
+
+// copied from genall package to override package loader configuration
+//
+// required for supporting various types (basic type aliases, imports from other packages)
+func forRoots(g genall.Generators, rootPaths ...string) (*genall.Runtime, error) {
+	roots, err := loader.LoadRootsWithConfig(
+		&packages.Config{
+			Mode: packages.NeedDeps | packages.NeedTypes,
+		},
+		rootPaths...,
+	)
+	if err != nil {
+		return nil, err
+	}
+	rt := &genall.Runtime{
+		Generators: g,
+		GenerationContext: genall.GenerationContext{
+			Collector: &markers.Collector{
+				Registry: &markers.Registry{},
+			},
+			Roots:     roots,
+			InputRule: genall.InputFromFileSystem,
+			Checker:   &loader.TypeChecker{},
+		},
+		OutputRules: genall.OutputRules{Default: genall.OutputToNothing},
+	}
+	if err := rt.Generators.RegisterMarkers(rt.Collector.Registry); err != nil {
+		return nil, err
+	}
+	return rt, nil
 }
