@@ -140,7 +140,14 @@ func generateMock(code *jen.File, iface Interface) {
 						if result.Type().String() == "error" {
 							group.Id(r).Op("=").Id("ret").Dot("Error").Call(jen.Lit(i))
 						} else {
-							group.Id(r).Op("=").Id("ret").Dot("Get").Call(jen.Lit(i)).Assert(jenutils.Type(&jen.Statement{}, result.Type()))
+							retValCode := jen.Id(r).Op("=").Id("ret").Dot("Get").Call(jen.Lit(i)).
+								Assert(jenutils.Type(&jen.Statement{}, result.Type()))
+
+							if jenutils.IsNillable(result.Type()) {
+								group.If(jen.Id("ret").Dot("Get").Call(jen.Lit(i)).Op("!=").Nil()).Block(retValCode)
+							} else {
+								group.Add(retValCode)
+							}
 						}
 					})
 

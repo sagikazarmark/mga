@@ -78,3 +78,15 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 
 	panic("unknown type: " + t.String())
 }
+
+// IsNillable checks if a type is nillable. Useful for guarding type conversions.
+func IsNillable(typ types.Type) bool {
+	switch t := typ.(type) {
+	case *types.Pointer, *types.Array, *types.Map, *types.Interface, *types.Signature, *types.Chan, *types.Slice:
+		return true
+	case *types.Named:
+		return IsNillable(t.Underlying())
+	}
+
+	return false
+}
