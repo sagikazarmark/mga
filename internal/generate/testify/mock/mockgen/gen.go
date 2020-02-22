@@ -18,8 +18,14 @@ import (
 
 // nolint: gochecknoglobals
 var (
-	mockMarker = markers.Must(markers.MakeDefinition("testify:mock", markers.DescribesType, struct{}{}))
+	mockMarker = markers.Must(markers.MakeDefinition("testify:mock", markers.DescribesType, Marker{}))
 )
+
+// Marker enables generating a mock for an interface and provides information to the generator.
+type Marker struct {
+	// TestOnly tells the generator to write the generated mock in a test file.
+	TestOnly bool `marker:"testOnly,optional"`
+}
 
 // Generator generates a Go kit Endpoint for a service.
 type Generator struct {
@@ -28,9 +34,6 @@ type Generator struct {
 
 	// Year specifies the year to substitute for " YEAR" in the header file.
 	Year string `marker:",optional"`
-
-	// TestOnly tells the generator to put the generated mocks in a _test package.
-	TestOnly bool `marker:",optional"`
 }
 
 func (g Generator) RegisterMarkers(into *markers.Registry) error {
@@ -61,18 +64,13 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 	headerText = strings.ReplaceAll(headerText, " YEAR", " "+g.Year)
 
 	for _, root := range ctx.Roots {
-		outContents := g.generatePackage(ctx, headerText, root)
-		if outContents == nil {
-			continue
-		}
-
-		writeOut(ctx, root, outContents)
+		g.generatePackage(ctx, headerText, root)
 	}
 
 	return nil
 }
 
-func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText string, root *loader.Package) []byte {
+func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText string, root *loader.Package) {
 	ctx.Checker.Check(root, func(node ast.Node) bool {
 		// ignore non-interfaces
 		// _, isIface := node.(*ast.InterfaceType)
@@ -83,10 +81,11 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 	root.NeedTypesInfo()
 
 	var interfaces []mock.Interface
+	var testOnlyInterfaces []mock.Interface
 
 	err := markers.EachType(ctx.Collector, root, func(info *markers.TypeInfo) {
-		marker := info.Markers.Get(mockMarker.Name)
-		if marker == nil {
+		marker, ok := info.Markers.Get(mockMarker.Name).(Marker)
+		if !ok {
 			return
 		}
 
@@ -110,22 +109,28 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			return
 		}
 
-		interfaces = append(
-			interfaces,
-			mock.Interface{
-				Object: named.Obj(),
-				Type:   named.Underlying().(*types.Interface),
-			},
-		)
+		if marker.TestOnly {
+			testOnlyInterfaces = append(
+				testOnlyInterfaces,
+				mock.Interface{
+					Object: named.Obj(),
+					Type:   named.Underlying().(*types.Interface),
+				},
+			)
+		} else {
+			interfaces = append(
+				interfaces,
+				mock.Interface{
+					Object: named.Obj(),
+					Type:   named.Underlying().(*types.Interface),
+				},
+			)
+		}
 	})
 	if err != nil {
 		root.AddError(err)
 
-		return nil
-	}
-
-	if len(interfaces) == 0 {
-		return nil
+		return
 	}
 
 	packageName, packagePath := root.Name, root.PkgPath
@@ -133,34 +138,57 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 		packageName, packagePath = pkgrefer.PackageRef(root)
 	}
 
-	if g.TestOnly && !strings.HasSuffix(packageName, "_test") {
-		packageName += "_test"
-	}
-
-	file := mock.File{
-		File: gentypes.File{
-			Package: gentypes.PackageRef{
-				Name: packageName,
-				Path: packagePath,
+	if len(testOnlyInterfaces) > 0 {
+		file := mock.File{
+			File: gentypes.File{
+				Package: gentypes.PackageRef{
+					Name: packageName,
+					Path: packagePath,
+				},
+				HeaderText: headerText,
 			},
-			HeaderText: headerText,
-		},
-		Interfaces: interfaces,
+			Interfaces: testOnlyInterfaces,
+		}
+
+		outContents, err := mock.Generate(file)
+		if err != nil {
+			root.AddError(err)
+
+			return
+		}
+
+		if outContents != nil {
+			writeOut(ctx, root, outContents, "zz_generated.mock_test.go")
+		}
 	}
+	if len(interfaces) > 0 {
+		file := mock.File{
+			File: gentypes.File{
+				Package: gentypes.PackageRef{
+					Name: packageName,
+					Path: packagePath,
+				},
+				HeaderText: headerText,
+			},
+			Interfaces: interfaces,
+		}
 
-	outContents, err := mock.Generate(file)
-	if err != nil {
-		root.AddError(err)
+		outContents, err := mock.Generate(file)
+		if err != nil {
+			root.AddError(err)
 
-		return nil
+			return
+		}
+
+		if outContents != nil {
+			writeOut(ctx, root, outContents, "zz_generated.mock.go")
+		}
 	}
-
-	return outContents
 }
 
 // writeOut outputs the given code.
-func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []byte) {
-	outputFile, err := ctx.Open(root, "zz_generated.mock.go")
+func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []byte, fileName string) {
+	outputFile, err := ctx.Open(root, fileName)
 	if err != nil {
 		root.AddError(err)
 		return

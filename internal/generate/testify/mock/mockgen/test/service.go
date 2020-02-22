@@ -12,9 +12,25 @@ type Todo struct {
 	Done bool
 }
 
-//go:generate mga gen mockery --name Service --inpkg
+//go:generate mga gen mockery --name Service
 // +testify:mock
 type Service interface {
+	// CreateTodo adds a new todo to the todo list.
+	CreateTodo(ctx context.Context, text string) (id string, err error)
+
+	// ListTodos returns the list of todos.
+	ListTodos(ctx context.Context) ([]Todo, error)
+
+	// MarkAsDone marks a todo as done.
+	MarkAsDone(ctx context.Context, id string) error
+
+	// TouchTodo records work on a todo.
+	TouchTodo(ctx context.Context, id string)
+}
+
+//go:generate mga gen mockery --name Service2
+// +testify:mock:testOnly=true
+type Service2 interface {
 	// CreateTodo adds a new todo to the todo list.
 	CreateTodo(ctx context.Context, text string) (id string, err error)
 

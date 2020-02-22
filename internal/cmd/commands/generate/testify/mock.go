@@ -13,7 +13,6 @@ import (
 type mockOptions struct {
 	headerFile string
 	year       string
-	testOnly   bool
 
 	paths  []string
 	output string
@@ -42,7 +41,6 @@ func NewMockCommand() *cobra.Command {
 	flags.StringVar(&options.output, "output", "pkg", "output rule")
 	flags.StringVar(&options.headerFile, "header-file", "", "header text (e.g. license) to prepend to generated files")
 	flags.StringVar(&options.year, "year", "", "copyright year")
-	flags.BoolVar(&options.testOnly, "test-only", false, "generate code in _test packages")
 
 	return cmd
 }
@@ -51,7 +49,6 @@ func runMock(options mockOptions) error {
 	var generator genall.Generator = mockgen.Generator{
 		HeaderFile: options.headerFile,
 		Year:       options.year,
-		TestOnly:   options.testOnly,
 	}
 
 	generators := genall.Generators{&generator}

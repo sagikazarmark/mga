@@ -1,1 +1,3 @@
+mocks/
 zz_generated.mock.go
+zz_generated.mock_test.go
