@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 	"sigs.k8s.io/controller-tools/pkg/loader"
 
 	"sagikazarmark.dev/mga/pkg/gentypes"
@@ -32,13 +33,21 @@ func TestGenerate(t *testing.T) {
 		{
 			name: "pointer_message",
 		},
+		{
+			name: "different_package",
+		},
 	}
 
 	for _, test := range tests {
 		test := test
 
 		t.Run(test.name, func(t *testing.T) {
-			pkgs, err := loader.LoadRoots(fmt.Sprintf("./testdata/generator/%s", test.name))
+			pkgs, err := loader.LoadRootsWithConfig(
+				&packages.Config{
+					Mode: packages.NeedDeps | packages.NeedTypes,
+				},
+				fmt.Sprintf("./testdata/generator/%s", test.name),
+			)
 			require.NoError(t, err)
 
 			pkg := pkgs[0]
