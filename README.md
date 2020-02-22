@@ -9,7 +9,7 @@
 The `mga` tool is an experimental collection of tools and practices related to developing Go applications.
 Its goal is to make the maintenance of applications, thus the life of developers easier.
 
-**⚠️ This tool is still under heavy development! Things may change.**
+**⚠️ This tool is still under heavy development! Things may change. ⚠️**
 
 Currently it includes code generators and scaffolding tools:
 
