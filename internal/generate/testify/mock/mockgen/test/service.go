@@ -2,6 +2,8 @@ package test
 
 import (
 	"context"
+
+	oldtodo "sagikazarmark.dev/mga/internal/generate/testify/mock/mockgen/test/subpkg"
 )
 
 // nolint: godox
@@ -26,6 +28,9 @@ type Service interface {
 
 	// TouchTodo records work on a todo.
 	TouchTodo(ctx context.Context, id string)
+
+	// ImportOldTodo imports a todo from the old format.
+	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
 }
 
 //go:generate mga gen mockery --name Service2
@@ -42,4 +47,7 @@ type Service2 interface {
 
 	// TouchTodo records work on a todo.
 	TouchTodo(ctx context.Context, id string)
+
+	// ImportOldTodo imports a todo from the old format.
+	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
 }
