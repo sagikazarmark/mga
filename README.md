@@ -15,7 +15,7 @@ Currently it includes code generators and scaffolding tools:
 
 - [Go kit](https://github.com/go-kit/kit/) [endpoint](http://gokit.io/faq/#endpoints-mdash-what-are-go-kit-endpoints) generator (based on a service interface)
 - Testify mock generator (similar to [mockery](https://github.com/vektra/mockery))
-- Event dispatcher generator (based on event structs) (compatible with [Watermill](https://github.com/ThreeDotsLabs/watermill))
+- Event dispatcher generator (based on event interface) (compatible with [Watermill](https://github.com/ThreeDotsLabs/watermill))
 - Event handler generator (based on event structs) (compatible with [Watermill](https://github.com/ThreeDotsLabs/watermill))
 
 **Roadmap:**
@@ -97,13 +97,17 @@ mga generate testify mock ./...
 ```go
 package my
 
+import (
+    "context"
+)
+
 // +mga:event:dispatcher
 
-type Event struct{
-    ID string
-
-    MyParam string
+type Events interface{
+    MyEvent(ctx context.Context, ev MyEvent) error
 }
+
+type MyEvent struct{}
 ```
 
 ```bash
