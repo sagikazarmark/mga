@@ -2,6 +2,7 @@ package jenutils
 
 import (
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -77,6 +78,42 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 	}
 
 	panic("unknown type: " + t.String())
+}
+
+// Import adds an import to the generated file when the type is a named type.
+func Import(file *jen.File, typ types.Type) {
+	switch t := typ.(type) {
+	case *types.Basic, *types.Interface, *types.Struct:
+		return
+
+	case *types.Array:
+		Import(file, t.Elem())
+
+	case *types.Slice:
+		Import(file, t.Elem())
+
+	case *types.Chan:
+		Import(file, t.Elem())
+
+	case *types.Map:
+		Import(file, t.Key())
+		Import(file, t.Elem())
+
+	case *types.Named:
+		if pkg := t.Obj().Pkg(); pkg != nil {
+			if pkg.Path() != pkg.Name() && // Internal packages always have the same path as the package name
+				!strings.HasSuffix(pkg.Path(), "/"+pkg.Name()) { // Package name is different
+				file.ImportAlias(pkg.Path(), pkg.Name())
+			} else {
+				file.ImportName(pkg.Path(), pkg.Name())
+			}
+		}
+
+		// builtin interfaces (eg. error) have no package
+
+	case *types.Pointer:
+		Import(file, t.Elem())
+	}
 }
 
 // IsNillable checks if a type is nillable. Useful for guarding type conversions.

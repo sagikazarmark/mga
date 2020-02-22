@@ -82,6 +82,7 @@ func generateMock(code *jen.File, iface Interface) {
 				for i := 0; i < params.Len(); i++ {
 					param := params.At(i)
 
+					jenutils.Import(code, param.Type())
 					jenutils.Type(group.Id(param.Name()), param.Type())
 				}
 			}).
@@ -91,6 +92,7 @@ func generateMock(code *jen.File, iface Interface) {
 				for i := 0; i < results.Len(); i++ {
 					result := results.At(i)
 
+					jenutils.Import(code, result.Type())
 					jenutils.Type(group.Id(result.Name()), result.Type())
 				}
 			}).
