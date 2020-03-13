@@ -208,7 +208,7 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 				jen.Commentf("%s is a response struct for %s endpoint.", responseName, endpointName),
 				jen.Type().Id(responseName).Struct(fields...),
 				jen.Func().Params(
-					jen.Id("r ").Id(responseName),
+					jen.Id("r").Id(responseName),
 				).Id("Failed").Params().Error().Block(
 					jen.Return(jen.Id("r").Dot("Err")),
 				),
@@ -310,16 +310,23 @@ func generateEndpointSet(code *jen.File, set EndpointSet) {
 			jen.Id("middleware").Op("...").Qual("github.com/go-kit/kit/endpoint", "Middleware"),
 		).
 		Params(jen.Id(endpointSetName)).
-		Block(
-			jen.Id("mw").
-				Op(":=").
-				Qual("github.com/sagikazarmark/kitx/endpoint", "Combine").
-				Call(jen.Id("middleware").Op("...")),
-			jen.Line(),
-			jen.Return(
+		BlockFunc(func(code *jen.Group) {
+			var mw *jen.Statement
+			if len(endpoints) == 0 {
+				mw = code.Id("_").Op("=")
+			} else {
+				mw = code.Id("mw").Op(":=")
+			}
+
+			mw.Qual("github.com/sagikazarmark/kitx/endpoint", "Combine").
+				Call(jen.Id("middleware").Op("..."))
+
+			code.Line()
+
+			code.Return(
 				jen.Id(endpointSetName).Values(endpointSetDict),
-			),
-		)
+			)
+		})
 
 	if set.WithOpenCensus {
 		code.ImportAlias("github.com/go-kit/kit/tracing/opencensus", "kitoc")
