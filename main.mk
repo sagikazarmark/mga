@@ -25,10 +25,10 @@ TEST_FORMAT = short-verbose
 endif
 
 # Dependency versions
-GOTESTSUM_VERSION ?= 0.4.0
-GOLANGCI_VERSION ?= 1.20.0
+GOTESTSUM_VERSION ?= 0.4.1
+GOLANGCI_VERSION ?= 1.23.6
 
-GOLANG_VERSION ?= 1.13
+GOLANG_VERSION ?= 1.14
 
 .PHONY: clear
 clear: ## Clear the working area and the project

@@ -11,6 +11,11 @@ linters:
         - funlen
         - dupl
         - wsl
+        - gomnd
+
+        # TODO: fixme
+        - godox
+        - gocognit
 
 service:
     golangci-lint-version: 1.20.x
