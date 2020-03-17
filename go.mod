@@ -1,6 +1,6 @@
 module sagikazarmark.dev/mga
 
-go 1.13
+go 1.14
 
 require (
 	emperror.dev/errors v0.7.0

@@ -58,5 +58,6 @@ type Service2 interface {
 // +testify:mock
 // from: https://github.com/sagikazarmark/mga/issues/34
 type Service3 interface {
-	Refresh(ctx context.Context, refreshToken string, deviceId string, userName string, jwtToken *jwt.Token) (string, string, error)
+	// nolint: lll
+	Refresh(ctx context.Context, refreshToken string, deviceID string, userName string, jwtToken *jwt.Token) (string, string, error)
 }

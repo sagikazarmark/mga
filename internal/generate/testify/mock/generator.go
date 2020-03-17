@@ -122,6 +122,8 @@ func generateMock(code *jen.File, iface Interface) {
 				var returns []jen.Code
 
 				for i := 0; i < results.Len(); i++ {
+					i := i
+
 					result := results.At(i)
 
 					r := fmt.Sprintf("r%d", i)
