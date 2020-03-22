@@ -27,9 +27,7 @@ jobs:
         run: make build
 
       - name: Lint
-        uses: actions-contrib/golangci-lint@v1
-        with:
-          golangci_lint_version: v1.24.0
+        run: make lint
 
       - name: Generate code
         run: make generate
