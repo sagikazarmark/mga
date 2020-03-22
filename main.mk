@@ -26,7 +26,7 @@ endif
 
 # Dependency versions
 GOTESTSUM_VERSION ?= 0.4.1
-GOLANGCI_VERSION ?= 1.23.6
+GOLANGCI_VERSION ?= 1.24.0
 
 GOLANG_VERSION ?= 1.14
 

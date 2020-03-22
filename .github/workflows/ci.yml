@@ -29,5 +29,8 @@ jobs:
       - name: Generate code
         run: make generate
 
-      - name: Tests
+      - name: Lint
+        run: make lint
+
+      - name: Test
         run: make test
