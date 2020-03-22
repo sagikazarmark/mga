@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run GoReleaser
+      - name: Release
         uses: goreleaser/goreleaser-action@v1
         with:
           version: v0.126.0
