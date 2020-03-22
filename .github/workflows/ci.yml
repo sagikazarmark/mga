@@ -26,11 +26,11 @@ jobs:
       - name: Build
         run: make build
 
-      - name: Lint
-        run: make lint
-
       - name: Generate code
         run: make generate
+
+      - name: Lint
+        run: make lint
 
       - name: Test
         run: make test
