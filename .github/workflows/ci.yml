@@ -26,8 +26,13 @@ jobs:
       - name: Build
         run: make build
 
+      - name: Lint
+        uses: actions-contrib/golangci-lint@v1
+        with:
+          golangci_lint_version: v1.23
+
       - name: Generate code
         run: make generate
 
-      - name: Tests
+      - name: Test
         run: make test
