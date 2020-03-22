@@ -2,7 +2,6 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sagikazarmark/mga/CI?style=flat-square)
 [![Go Report Card](https://goreportcard.com/badge/sagikazarmark.dev/mga?style=flat-square)](https://goreportcard.com/report/sagikazarmark.dev/mga)
-[![GolangCI](https://golangci.com/badges/github.com/sagikazarmark/mga.svg)](https://golangci.com/r/github.com/sagikazarmark/mga)
 
 **Go application development tool applying modern practices.**
 
