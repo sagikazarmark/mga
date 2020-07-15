@@ -71,6 +71,8 @@ func generateMock(code *jen.File, iface Interface) {
 		sig := method.Type().(*types.Signature)
 
 		const recv = "_m"
+		const unnamedParameterPrefix = "_parameter_"
+		const unnamedResultPrefix = "_result_"
 
 		code.Commentf("%s provides a mock function.", method.Name())
 		code.Func().
@@ -82,8 +84,13 @@ func generateMock(code *jen.File, iface Interface) {
 				for i := 0; i < params.Len(); i++ {
 					param := params.At(i)
 
+					paramName := param.Name()
+					if paramName == "" {
+						paramName = fmt.Sprintf("%s%d", unnamedParameterPrefix, i)
+					}
+
 					jenutils.Import(code, param.Type())
-					jenutils.Type(group.Id(param.Name()), param.Type())
+					jenutils.Type(group.Id(paramName), param.Type())
 				}
 			}).
 			ParamsFunc(func(group *jen.Group) {
@@ -91,9 +98,13 @@ func generateMock(code *jen.File, iface Interface) {
 
 				for i := 0; i < results.Len(); i++ {
 					result := results.At(i)
+					resultName := result.Name()
+					if resultName == "" {
+						resultName = fmt.Sprintf("%s%d", unnamedResultPrefix, i)
+					}
 
 					jenutils.Import(code, result.Type())
-					jenutils.Type(group.Id(result.Name()), result.Type())
+					jenutils.Type(group.Id(resultName), result.Type())
 				}
 			}).
 			BlockFunc(func(group *jen.Group) {
@@ -105,9 +116,13 @@ func generateMock(code *jen.File, iface Interface) {
 
 				for i := 0; i < params.Len(); i++ {
 					param := params.At(i)
+					paramName := param.Name()
+					if paramName == "" {
+						paramName = fmt.Sprintf("%s%d", unnamedParameterPrefix, i)
+					}
 
 					assertParams = append(assertParams, jenutils.Type(&jen.Statement{}, param.Type()))
-					callParams = append(callParams, jen.Id(param.Name()))
+					callParams = append(callParams, jen.Id(paramName))
 				}
 
 				if results.Len() == 0 {

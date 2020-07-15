@@ -61,3 +61,20 @@ type Service3 interface {
 	// nolint: lll
 	Refresh(ctx context.Context, refreshToken string, deviceID string, userName string, jwtToken *jwt.Token) (string, string, error)
 }
+
+//go:generate mga gen mockery --name Service4UnnamedParametersAndResults
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #1.
+type Service4UnnamedParametersAndResults interface {
+	NamedParametersAndResults(isEnabled bool, count int, name string) (values []string, owner string, err error)
+
+	UnnamedParameter(bool) (values []string, owner string, err error)
+
+	UnnamedParameters(bool, int, string) (values []string, owner string, err error)
+
+	UnnamedParametersAndResults(bool, int, string) ([]string, string, error)
+
+	UnnamedResult(isEnabled bool, count int, name string) error
+
+	UnnamedResults(isEnabled bool, count int, name string) ([]string, string, error)
+}
