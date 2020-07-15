@@ -78,3 +78,12 @@ type Service4UnnamedParametersAndResults interface {
 
 	UnnamedResults(isEnabled bool, count int, name string) ([]string, string, error)
 }
+
+//go:generate mga gen mockery --name Service5VariadicParameters
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #2.
+type Service5VariadicParameters interface {
+	Regular(id string, count int, arguments []interface{}) (err error)
+
+	Variadic(id string, count int, arguments ...interface{}) (err error)
+}
