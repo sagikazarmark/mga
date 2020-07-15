@@ -65,6 +65,30 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 	case *types.Pointer:
 		return Type(stmt.Op("*"), t.Elem())
 
+	case *types.Signature:
+		stmt := stmt.Func()
+
+		if t.Recv() != nil {
+			stmt.Params(Type(jen.Id(t.Recv().Name()), t.Recv().Type()))
+		}
+
+		if t.Params() != nil {
+			params := make([]jen.Code, t.Params().Len())
+			for paramIndex := 0; paramIndex < t.Params().Len(); paramIndex++ {
+				params[paramIndex] = Type(jen.Id(t.Params().At(paramIndex).Name()), t.Params().At(paramIndex).Type())
+			}
+			stmt.Params(params...)
+		}
+
+		if t.Results() != nil {
+			results := make([]jen.Code, t.Results().Len())
+			for resultIndex := 0; resultIndex < t.Results().Len(); resultIndex++ {
+				results[resultIndex] = Type(jen.Id(t.Results().At(resultIndex).Name()), t.Results().At(resultIndex).Type())
+			}
+			stmt.Params(results...)
+		}
+
+		return stmt
 	case *types.Struct:
 		var fields []jen.Code
 
@@ -113,6 +137,23 @@ func Import(file *jen.File, typ types.Type) {
 
 	case *types.Pointer:
 		Import(file, t.Elem())
+
+	case *types.Signature:
+		if t.Recv() != nil {
+			Import(file, t.Recv().Type())
+		}
+
+		if t.Params() != nil {
+			for paramIndex := 0; paramIndex < t.Params().Len(); paramIndex++ {
+				Import(file, t.Params().At(paramIndex).Type())
+			}
+		}
+
+		if t.Results() != nil {
+			for resultIndex := 0; resultIndex < t.Results().Len(); resultIndex++ {
+				Import(file, t.Results().At(resultIndex).Type())
+			}
+		}
 	}
 }
 

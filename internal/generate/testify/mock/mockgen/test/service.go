@@ -87,3 +87,17 @@ type Service5VariadicParameters interface {
 
 	Variadic(id string, count int, arguments ...interface{}) (err error)
 }
+
+//go:generate mga gen mockery --name Service6FunctionParameters
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #3.
+type Service6FunctionParameters interface {
+	FunctionParameter(id string, predicate func(id oldtodo.ID, todo oldtodo.OldTodo) bool, count int) (err error)
+
+	FunctionParameters(
+		id string,
+		predicate func(id string, importedTodo oldtodo.OldTodo) bool,
+		operation func(count int, importedID oldtodo.ID),
+		count int,
+	) (err error)
+}
