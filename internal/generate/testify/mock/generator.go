@@ -69,8 +69,14 @@ func generateMock(code *jen.File, iface Interface) {
 		method := iface.Type.Method(i)
 
 		sig := method.Type().(*types.Signature)
+		isVariadicFunction := sig.Variadic()
 
 		const recv = "_m"
+		const varParamName = "varParam"
+		const varParamsName = "varParams"
+		const varIndexName = "varIndex"
+		const unnamedParameterPrefix = "_parameter_"
+		const unnamedResultPrefix = "_result_"
 
 		code.Commentf("%s provides a mock function.", method.Name())
 		code.Func().
@@ -82,8 +88,24 @@ func generateMock(code *jen.File, iface Interface) {
 				for i := 0; i < params.Len(); i++ {
 					param := params.At(i)
 
-					jenutils.Import(code, param.Type())
-					jenutils.Type(group.Id(param.Name()), param.Type())
+					paramName := param.Name()
+					if paramName == "" {
+						paramName = fmt.Sprintf("%s%d", unnamedParameterPrefix, i)
+					}
+
+					paramNameStatement := group.Id(paramName)
+					paramType := param.Type()
+					if isVariadicFunction &&
+						i == params.Len()-1 {
+						// Note: variadic type is received as []Type, but should
+						// be generated as ...Type function parameter.
+						paramNameStatement = paramNameStatement.Op("...")
+						sliceType := paramType.(*types.Slice)
+						paramType = sliceType.Elem()
+					}
+
+					jenutils.Import(code, paramType)
+					jenutils.Type(paramNameStatement, paramType)
 				}
 			}).
 			ParamsFunc(func(group *jen.Group) {
@@ -91,9 +113,13 @@ func generateMock(code *jen.File, iface Interface) {
 
 				for i := 0; i < results.Len(); i++ {
 					result := results.At(i)
+					resultName := result.Name()
+					if resultName == "" {
+						resultName = fmt.Sprintf("%s%d", unnamedResultPrefix, i)
+					}
 
 					jenutils.Import(code, result.Type())
-					jenutils.Type(group.Id(result.Name()), result.Type())
+					jenutils.Type(group.Id(resultName), result.Type())
 				}
 			}).
 			BlockFunc(func(group *jen.Group) {
@@ -103,20 +129,70 @@ func generateMock(code *jen.File, iface Interface) {
 				var assertParams []jen.Code
 				var callParams []jen.Code
 
+				if isVariadicFunction {
+					paramName := params.At(params.Len() - 1).Name()
+					if paramName == "" {
+						paramName = fmt.Sprintf("%s%d", unnamedParameterPrefix, params.Len()-1)
+					}
+
+					group.Id(varParamsName).Op(":=").Make(
+						jen.List(
+							jen.Index().Add(jen.Interface()),
+							jen.Op(fmt.Sprintf("%d+len(%s)", params.Len()-1, paramName)),
+						),
+					)
+				}
+
 				for i := 0; i < params.Len(); i++ {
 					param := params.At(i)
 
-					assertParams = append(assertParams, jenutils.Type(&jen.Statement{}, param.Type()))
-					callParams = append(callParams, jen.Id(param.Name()))
+					paramName := param.Name()
+					if paramName == "" {
+						paramName = fmt.Sprintf("%s%d", unnamedParameterPrefix, i)
+					}
+
+					paramNameStatement := jen.Id(paramName)
+					paramType := param.Type()
+					paramTypeStatement := &jen.Statement{}
+					if isVariadicFunction &&
+						i == params.Len()-1 {
+						// Note: variadic type is received as []Type, but should
+						// be generated as ...Type function parameter and value... argument.
+						paramNameStatement = paramNameStatement.Op("...")
+						paramTypeStatement = paramTypeStatement.Op("...")
+						sliceType := paramType.(*types.Slice)
+						paramType = sliceType.Elem()
+					}
+
+					assertParams = append(assertParams, jenutils.Type(paramTypeStatement, paramType))
+					callParams = append(callParams, paramNameStatement)
+
+					if isVariadicFunction {
+						if i < params.Len()-1 {
+							group.Id(varParamsName).Index(jen.Op(fmt.Sprintf("%d", i))).Op("=").Id(paramName)
+						} else {
+							group.For(jen.List(jen.Id(varIndexName), jen.Id(varParamName))).Op(":=").Range().Id(paramName).Block(
+								jen.Id(varParamsName).Index(jen.Op(fmt.Sprintf("%d+%s", i, varIndexName))).Op("=").Id(varParamName),
+							)
+						}
+					}
+				}
+
+				calledParams := callParams
+				if isVariadicFunction {
+					group.Line()
+					calledParams = []jen.Code{
+						jen.Id(varParamsName).Op("..."),
+					}
 				}
 
 				if results.Len() == 0 {
-					group.Id(recv).Dot("Called").Call(callParams...)
+					group.Id(recv).Dot("Called").Call(calledParams...)
 
 					return
 				}
 
-				group.Id("ret").Op(":=").Id(recv).Dot("Called").Call(callParams...)
+				group.Id("ret").Op(":=").Id(recv).Dot("Called").Call(calledParams...)
 				group.Line()
 
 				var returns []jen.Code

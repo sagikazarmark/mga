@@ -61,3 +61,43 @@ type Service3 interface {
 	// nolint: lll
 	Refresh(ctx context.Context, refreshToken string, deviceID string, userName string, jwtToken *jwt.Token) (string, string, error)
 }
+
+//go:generate mga gen mockery --name Service4UnnamedParametersAndResults
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #1.
+type Service4UnnamedParametersAndResults interface {
+	NamedParametersAndResults(isEnabled bool, count int, name string) (values []string, owner string, err error)
+
+	UnnamedParameter(bool) (values []string, owner string, err error)
+
+	UnnamedParameters(bool, int, string) (values []string, owner string, err error)
+
+	UnnamedParametersAndResults(bool, int, string) ([]string, string, error)
+
+	UnnamedResult(isEnabled bool, count int, name string) error
+
+	UnnamedResults(isEnabled bool, count int, name string) ([]string, string, error)
+}
+
+//go:generate mga gen mockery --name Service5VariadicParameters
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #2.
+type Service5VariadicParameters interface {
+	Regular(id string, count int, arguments []interface{}) (err error)
+
+	Variadic(id string, count int, arguments ...interface{}) (err error)
+}
+
+//go:generate mga gen mockery --name Service6FunctionParameters
+// +testify:mock
+// from https://github.com/sagikazarmark/mga/pull/42 #3.
+type Service6FunctionParameters interface {
+	FunctionParameter(id string, predicate func(id oldtodo.ID, todo oldtodo.OldTodo) bool, count int) (err error)
+
+	FunctionParameters(
+		id string,
+		predicate func(id string, importedTodo oldtodo.OldTodo) bool,
+		operation func(count int, importedID oldtodo.ID),
+		count int,
+	) (err error)
+}
