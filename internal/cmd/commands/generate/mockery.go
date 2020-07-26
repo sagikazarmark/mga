@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"regexp"
@@ -9,7 +10,7 @@ import (
 
 	"emperror.dev/errors"
 	"github.com/spf13/cobra"
-	"github.com/vektra/mockery/mockery"
+	"github.com/vektra/mockery/v2/pkg"
 )
 
 type mockeryOptions struct {
@@ -113,11 +114,11 @@ func runMockery(options mockeryOptions) error {
 		defer pprof.StopCPUProfile()
 	}
 
-	var osp mockery.OutputStreamProvider
+	var osp pkg.OutputStreamProvider
 	if options.fPrint {
-		osp = &mockery.StdoutStreamProvider{}
+		osp = &pkg.StdoutStreamProvider{}
 	} else {
-		osp = &mockery.FileOutputStreamProvider{
+		osp = &pkg.FileOutputStreamProvider{
 			BaseDir:                   options.fOutput,
 			InPackage:                 options.fIP,
 			TestOnly:                  options.fTO,
@@ -127,14 +128,14 @@ func runMockery(options mockeryOptions) error {
 		}
 	}
 
-	visitor := &mockery.GeneratorVisitor{
+	visitor := &pkg.GeneratorVisitor{
 		InPackage:   options.fIP,
 		Note:        options.fNote,
 		Osp:         osp,
 		PackageName: options.fOutpkg,
 	}
 
-	walker := mockery.Walker{
+	walker := pkg.Walker{
 		BaseDir:   options.fDir,
 		Recursive: recursive,
 		Filter:    filter,
@@ -142,7 +143,7 @@ func runMockery(options mockeryOptions) error {
 		BuildTags: strings.Split(options.buildTags, " "),
 	}
 
-	generated := walker.Walk(visitor)
+	generated := walker.Walk(context.Background(), visitor)
 
 	if options.fName != "" && !generated {
 		return errors.Errorf("unable to find %s in any go files under this path\n", options.fName)
