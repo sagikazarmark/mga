@@ -13,10 +13,10 @@ require (
 	github.com/gobuffalo/here v0.6.0
 	github.com/hashicorp/go-getter v1.4.1
 	github.com/sagikazarmark/kitx v0.12.0
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v1.0.0
 	github.com/stretchr/testify v1.4.0
 	github.com/vbauerster/mpb/v4 v4.11.2
-	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5
-	golang.org/x/tools v0.0.0-20200216192241-b320d3a0f5a2
+	github.com/vektra/mockery/v2 v2.1.0
+	golang.org/x/tools v0.0.0-20200323144430-8dcfad9e016e
 	sigs.k8s.io/controller-tools v0.2.5
 )
