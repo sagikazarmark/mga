@@ -101,3 +101,41 @@ type Service6FunctionParameters interface {
 		count int,
 	) (err error)
 }
+
+//go:generate mga gen mockery --name Service7
+// +testify:mock:external=true
+type Service7 interface {
+	// CreateTodo adds a new todo to the todo list.
+	CreateTodo(ctx context.Context, text string) (id string, err error)
+
+	// ListTodos returns the list of todos.
+	ListTodos(ctx context.Context) ([]Todo, error)
+
+	// MarkAsDone marks a todo as done.
+	MarkAsDone(ctx context.Context, id string) error
+
+	// TouchTodo records work on a todo.
+	TouchTodo(ctx context.Context, id string)
+
+	// ImportOldTodo imports a todo from the old format.
+	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
+}
+
+//go:generate mga gen mockery --name Service8
+// +testify:mock:external=true,testOnly=true
+type Service8 interface {
+	// CreateTodo adds a new todo to the todo list.
+	CreateTodo(ctx context.Context, text string) (id string, err error)
+
+	// ListTodos returns the list of todos.
+	ListTodos(ctx context.Context) ([]Todo, error)
+
+	// MarkAsDone marks a todo as done.
+	MarkAsDone(ctx context.Context, id string) error
+
+	// TouchTodo records work on a todo.
+	TouchTodo(ctx context.Context, id string)
+
+	// ImportOldTodo imports a todo from the old format.
+	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
+}
