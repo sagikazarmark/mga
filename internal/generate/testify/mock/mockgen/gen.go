@@ -25,6 +25,12 @@ var (
 type Marker struct {
 	// TestOnly tells the generator to write the generated mock in a test file.
 	TestOnly bool `marker:"testOnly,optional"`
+
+	// External tells the generator to write the generated mock in an "external" test package
+	// (package name suffixed with _test).
+	// External also implies TestOnly, but setting both values will generate the mock twice:
+	// once in the same package in a test file, once in an external package.
+	External bool `marker:"external,optional"`
 }
 
 // Generator generates a Go kit Endpoint for a service.
@@ -82,6 +88,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 
 	var interfaces []mock.Interface
 	var testOnlyInterfaces []mock.Interface
+	var externalInterfaces []mock.Interface
 
 	err := markers.EachType(ctx.Collector, root, func(info *markers.TypeInfo) {
 		marker, ok := info.Markers.Get(mockMarker.Name).(Marker)
@@ -109,22 +116,24 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			return
 		}
 
-		if marker.TestOnly {
-			testOnlyInterfaces = append(
-				testOnlyInterfaces,
-				mock.Interface{
-					Object: named.Obj(),
-					Type:   named.Underlying().(*types.Interface),
-				},
-			)
-		} else {
-			interfaces = append(
-				interfaces,
-				mock.Interface{
-					Object: named.Obj(),
-					Type:   named.Underlying().(*types.Interface),
-				},
-			)
+		iface := mock.Interface{
+			Object: named.Obj(),
+			Type:   named.Underlying().(*types.Interface),
+		}
+
+		switch {
+		case marker.External:
+			externalInterfaces = append(externalInterfaces, iface)
+
+			if marker.TestOnly {
+				testOnlyInterfaces = append(testOnlyInterfaces, iface)
+			}
+
+		case marker.TestOnly:
+			testOnlyInterfaces = append(testOnlyInterfaces, iface)
+
+		default:
+			interfaces = append(interfaces, iface)
 		}
 	})
 	if err != nil {
@@ -136,6 +145,30 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 	packageName, packagePath := root.Name, root.PkgPath
 	if pkgrefer, ok := ctx.OutputRule.(genutils.PackageRefer); ok {
 		packageName, packagePath = pkgrefer.PackageRef(root)
+	}
+
+	if len(externalInterfaces) > 0 {
+		file := mock.File{
+			File: gentypes.File{
+				Package: gentypes.PackageRef{
+					Name: packageName + "_test",
+					Path: packagePath + "_test", // See https://github.com/dave/jennifer/issues/73
+				},
+				HeaderText: headerText,
+			},
+			Interfaces: externalInterfaces,
+		}
+
+		outContents, err := mock.Generate(file)
+		if err != nil {
+			root.AddError(err)
+
+			return
+		}
+
+		if outContents != nil {
+			writeOut(ctx, root, outContents, "zz_generated.mock_external_test.go")
+		}
 	}
 
 	if len(testOnlyInterfaces) > 0 {
@@ -161,6 +194,7 @@ func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText str
 			writeOut(ctx, root, outContents, "zz_generated.mock_test.go")
 		}
 	}
+
 	if len(interfaces) > 0 {
 		file := mock.File{
 			File: gentypes.File{
