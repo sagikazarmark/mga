@@ -2,7 +2,7 @@
 version = 15.4.0
 
 [go]
-importpath =  sagikazarmark.dev/mga
+importpath = sagikazarmark.dev/mga
 
 [buildconfig]
 golangci-lint-version = 1.31.0
