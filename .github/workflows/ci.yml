@@ -11,26 +11,59 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     env:
-      VERBOSE: 1
       GOFLAGS: -mod=readonly
+      PLZ_ARGS: -p
 
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
-          go-version: 1.14
+          go-version: 1.15
+
+      - name: Compile Go stdlib for Darwin
+        run: go install -v std
+        env:
+          GOOS: darwin
+
+      - name: Set Please overrides
+        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
 
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Build
-        run: make build
+        run: ./pleasew $PLZ_ARGS build //...
 
-      - name: Generate code
-        run: make generate
-
-      - name: Lint
-        run: make lint
+      - name: Generate
+        run: ./pleasew $PLZ_ARGS generate
 
       - name: Test
-        run: make test
+        run: ./pleasew $PLZ_ARGS test //...
+
+      - name: Save Please log output
+        uses: actions/upload-artifact@v1
+        with:
+          name: build-log
+          path: plz-out/log
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env:
+      GOFLAGS: -mod=readonly
+      PLZ_ARGS: -p
+
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Generate
+        run: ./pleasew $PLZ_ARGS generate
+
+      - name: Run linter
+        run: ./pleasew $PLZ_ARGS lint

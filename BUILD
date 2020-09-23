@@ -26,7 +26,7 @@ sh_cmd(
     name = "generate",
     deps = [":mga"],
     cmd = [
-        "go generate ./...",
+        "PATH=\\\$(pwd)/\\\$(dirname $(out_location :mga)):\\\$PATH go generate -x ./...",
         "$(out_location :mga) generate kit endpoint ./...",
         "$(out_location :mga) generate event handler ./...",
         "$(out_location :mga) generate event handler --output subpkg:suffix=gen ./...",
