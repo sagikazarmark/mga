@@ -143,12 +143,14 @@ func writeOut(ctx *genall.GenerationContext, root *loader.Package, outBytes []by
 	outputFile, err := ctx.Open(root, "zz_generated.event_handler.go")
 	if err != nil {
 		root.AddError(err)
+
 		return
 	}
 	defer outputFile.Close()
 	n, err := outputFile.Write(outBytes)
 	if err != nil {
 		root.AddError(err)
+
 		return
 	}
 	if n < len(outBytes) {

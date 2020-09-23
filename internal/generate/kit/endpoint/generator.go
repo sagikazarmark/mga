@@ -38,7 +38,7 @@ type EndpointSet struct {
 	ErrorStrategy string
 }
 
-// Service represents a service interface
+// Service represents a service interface.
 type Service struct {
 	Object *types.TypeName
 	Type   *types.Interface
@@ -83,6 +83,7 @@ func Generate(file File) ([]byte, error) {
 	return format.Source(buf.Bytes())
 }
 
+// nolint: gocognit
 func generateEndpointSet(code *jen.File, set EndpointSet) {
 	svc := set.Service
 
