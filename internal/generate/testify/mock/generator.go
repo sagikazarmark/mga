@@ -54,6 +54,7 @@ func Generate(file File) ([]byte, error) {
 	return format.Source(buf.Bytes())
 }
 
+// nolint: gocognit
 func generateMock(code *jen.File, iface Interface) {
 	// import the interface package
 	code.ImportName(iface.Object.Pkg().Path(), iface.Object.Pkg().Name())

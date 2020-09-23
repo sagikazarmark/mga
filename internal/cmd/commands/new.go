@@ -64,7 +64,7 @@ func runNew(cmd *cobra.Command, options newOptions) error {
 		return err
 	}
 
-	var getterOptions = make([]getter.ClientOption, 0)
+	getterOptions := make([]getter.ClientOption, 0)
 
 	cmd.Println(color.BlueString("Creating a new project under %q", dest))
 

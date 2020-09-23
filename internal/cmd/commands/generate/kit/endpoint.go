@@ -92,9 +92,9 @@ func runEndpoint(options endpointOptions) error {
 	return nil
 }
 
-// copied from genall package to override package loader configuration
+// copied from genall package to override package loader configuration.
 //
-// required for supporting various types (basic type aliases, imports from other packages)
+// required for supporting various types (basic type aliases, imports from other packages).
 func forRoots(g genall.Generators, rootPaths ...string) (*genall.Runtime, error) {
 	roots, err := loader.LoadRootsWithConfig(
 		&packages.Config{
@@ -120,5 +120,6 @@ func forRoots(g genall.Generators, rootPaths ...string) (*genall.Runtime, error)
 	if err := rt.Generators.RegisterMarkers(rt.Collector.Registry); err != nil {
 		return nil, err
 	}
+
 	return rt, nil
 }
