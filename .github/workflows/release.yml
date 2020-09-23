@@ -35,7 +35,7 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
 
       - name: Publish
-        run: ./pleasew $PLZ_ARGS publish -m "${{ steps.get_version.outputs.tag }}" ${{ steps.get_version.outputs.tag }}
+        run: ./pleasew $PLZ_ARGS run //:publish -- -m "${{ steps.get_version.outputs.tag }}" ${{ steps.get_version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
