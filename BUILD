@@ -43,7 +43,7 @@ tarball(
     srcs = ["README.md", "LICENSE", ":mga"],
     out = f"mga_{CONFIG.OS}_{CONFIG.ARCH}.tar.gz",
     gzip = True,
-    labels = ["dist"],
+    labels = ["manual"],
 )
 
 subinclude("///pleasings2//misc")
