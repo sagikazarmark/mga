@@ -65,7 +65,7 @@ jobs:
       - name: Generate
         run: ./pleasew $PLZ_ARGS generate
 
-      - name: Run linter
+      - name: Lint
         run: ./pleasew $PLZ_ARGS lint
 
   artifacts:
