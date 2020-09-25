@@ -1,7 +1,7 @@
 github_repo(
     name = "pleasings2",
     repo = "sagikazarmark/mypleasings",
-    revision = "4c40fa674130e6d92bcdb4ef9bd17954fdbf3fab",
+    revision = "f8a12721c6f929db3e227e07c152d428ac47ab1b",
 )
 
 subinclude("///pleasings2//go")
@@ -39,7 +39,7 @@ sh_cmd(
 )
 
 tarball(
-    name = "package",
+    name = "artifact",
     srcs = ["README.md", "LICENSE", ":mga"],
     out = f"mga_{CONFIG.OS}_{CONFIG.ARCH}.tar.gz",
     gzip = True,
@@ -48,24 +48,19 @@ tarball(
 
 subinclude("///pleasings2//misc")
 
-sha256sum(
-    name = "checksums.txt",
-    srcs = [
-        "@linux_amd64//:package",
-        "@darwin_amd64//:package",
+build_artifacts(
+    name = "artifacts",
+    artifacts = [
+        "@linux_amd64//:artifact",
+        "@darwin_amd64//:artifact",
     ],
-    out = "checksums.txt",
-    labels = ["dist"],
+    labels = ["manual"],
 )
 
 subinclude("///pleasings2//github")
 
 github_release(
     name = "publish",
-    assets = [
-        "@linux_amd64//:package",
-        "@darwin_amd64//:package",
-        ":checksums.txt",
-    ],
-    labels = ["dist"],
+    assets = [":artifacts"],
+    labels = ["manual"],
 )
