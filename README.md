@@ -139,15 +139,18 @@ See [Modern Go Application](https://github.com/sagikazarmark/modern-go-applicati
 
 ## Development
 
+Contributions are welcome! :)
+
 1. Clone the repository
 1. Make changes on a new branch
-1. Run
-    - `./pleasew build`
-    - `./pleasew generate`
-    - `./pleasew lint`
-    - `./pleasew test`
-    - `./pleasew gotest`
-1. Commit, push and open PR
+1. Run the test suite:
+    ```bash
+    ./pleasew build
+    ./pleasew test
+    ./pleasew gotest
+    ./pleasew lint
+    ```
+1. Commit, push and open a PR
 
 
 ## License
