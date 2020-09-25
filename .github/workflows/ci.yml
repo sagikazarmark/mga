@@ -38,7 +38,9 @@ jobs:
         run: ./pleasew $PLZ_ARGS generate
 
       - name: Test
-        run: ./pleasew $PLZ_ARGS test //...
+        run: |
+          ./pleasew $PLZ_ARGS test //...
+          ./pleasew $PLZ_ARGS gotest
 
       - name: Save Please log output
         uses: actions/upload-artifact@v1
