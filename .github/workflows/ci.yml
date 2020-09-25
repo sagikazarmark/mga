@@ -67,3 +67,54 @@ jobs:
 
       - name: Run linter
         run: ./pleasew $PLZ_ARGS lint
+
+  artifacts:
+    name: Artifacts
+    runs-on: ubuntu-latest
+    env:
+      GOFLAGS: -mod=readonly
+      PLZ_ARGS: -p
+
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: Compile Go stdlib for Darwin
+        run: go install -v std
+        env:
+          GOOS: darwin
+
+      - name: Set Please overrides
+        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: ./pleasew $PLZ_ARGS build :artifacts
+
+      - name: Upload linux artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: mga_linux_amd64.tar.gz
+          path: plz-out/gen/mga_linux_amd64.tar.gz
+
+      - name: Upload darwin artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: mga_darwin_amd64.tar.gz
+          path: plz-out/gen/mga_darwin_amd64.tar.gz
+
+      - name: Upload checksums
+        uses: actions/upload-artifact@v1
+        with:
+          name: checksums.txt
+          path: plz-out/gen/checksums.txt
+
+      - name: Save Please log output
+        uses: actions/upload-artifact@v1
+        with:
+          name: artifacts-log
+          path: plz-out/log
