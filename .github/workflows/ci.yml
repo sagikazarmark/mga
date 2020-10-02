@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOFLAGS: -mod=readonly
-      PLZ_ARGS: -p
 
     steps:
       - name: Set up Go
@@ -25,35 +24,30 @@ jobs:
         env:
           GOOS: darwin
 
-      - name: Set Please overrides
-        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
-
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Please
+        uses: sagikazarmark/setup-please-action@v0
+        with:
+          save-logs: 'true'
+
       - name: Build
-        run: ./pleasew $PLZ_ARGS build //...
+        run: plz build //...
 
       - name: Generate
-        run: ./pleasew $PLZ_ARGS generate
+        run: plz generate
 
       - name: Test
         run: |
-          ./pleasew $PLZ_ARGS test //...
-          ./pleasew $PLZ_ARGS gotest
-
-      - name: Save Please log output
-        uses: actions/upload-artifact@v1
-        with:
-          name: build-log
-          path: plz-out/log
+          plz test //...
+          plz gotest
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     env:
       GOFLAGS: -mod=readonly
-      PLZ_ARGS: -p
 
     steps:
       - name: Set up Go
@@ -61,24 +55,25 @@ jobs:
         with:
           go-version: 1.15
 
-      - name: Set Please overrides
-        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
-
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Please
+        uses: sagikazarmark/setup-please-action@v0
+        with:
+          save-logs: 'true'
+
       - name: Generate
-        run: ./pleasew $PLZ_ARGS generate
+        run: plz generate
 
       - name: Lint
-        run: ./pleasew $PLZ_ARGS lint
+        run: plz lint
 
   artifacts:
     name: Artifacts
     runs-on: ubuntu-latest
     env:
       GOFLAGS: -mod=readonly
-      PLZ_ARGS: -p
 
     steps:
       - name: Set up Go
@@ -91,14 +86,16 @@ jobs:
         env:
           GOOS: darwin
 
-      - name: Set Please overrides
-        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
-
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Please
+        uses: sagikazarmark/setup-please-action@v0
+        with:
+          save-logs: 'true'
+
       - name: Build
-        run: ./pleasew $PLZ_ARGS build :artifacts
+        run: plz build :artifacts
 
       - name: Upload linux artifact
         uses: actions/upload-artifact@v1
@@ -117,9 +114,3 @@ jobs:
         with:
           name: checksums.txt
           path: plz-out/gen/checksums.txt
-
-      - name: Save Please log output
-        uses: actions/upload-artifact@v1
-        with:
-          name: artifacts-log
-          path: plz-out/log
