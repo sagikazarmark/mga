@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - v[0-9]+.[0-9]+.[0-9]+
 
 jobs:
   publish:
@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOFLAGS: -mod=readonly
-      PLZ_ARGS: -p
 
     steps:
       - name: Set up Go
@@ -24,23 +23,19 @@ jobs:
         env:
           GOOS: darwin
 
-      - name: Set Please overrides
-        run: echo "::set-env name=PLZ_OVERRIDES::build.path:$PATH"
-
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up Please
+        uses: sagikazarmark/setup-please-action@v0
+        with:
+          save-logs: 'true'
 
       - name: Get the version
         id: get_version
         run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
 
       - name: Publish
-        run: ./pleasew $PLZ_ARGS run //:publish -- ${{ steps.get_version.outputs.tag }}
+        run: plz run //:publish -- ${{ steps.get_version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Save Please log output
-        uses: actions/upload-artifact@v1
-        with:
-          name: release-log
-          path: plz-out/log
