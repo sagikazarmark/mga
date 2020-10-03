@@ -28,14 +28,8 @@ jobs:
 
       - name: Set up Please
         uses: sagikazarmark/setup-please-action@v0
-        with:
-          save-logs: 'true'
-
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/tags/}
 
       - name: Publish
-        run: plz run //:publish -- ${{ steps.get_version.outputs.tag }}
+        run: plz run //:publish -- ${GITHUB_REF#refs/tags/}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -7,8 +7,8 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: Test
     runs-on: ubuntu-latest
     env:
       GOFLAGS: -mod=readonly
@@ -29,8 +29,6 @@ jobs:
 
       - name: Set up Please
         uses: sagikazarmark/setup-please-action@v0
-        with:
-          save-logs: 'true'
 
       - name: Build
         run: plz build //...
@@ -60,8 +58,6 @@ jobs:
 
       - name: Set up Please
         uses: sagikazarmark/setup-please-action@v0
-        with:
-          save-logs: 'true'
 
       - name: Generate
         run: plz generate
@@ -91,8 +87,6 @@ jobs:
 
       - name: Set up Please
         uses: sagikazarmark/setup-please-action@v0
-        with:
-          save-logs: 'true'
 
       - name: Build
         run: plz build :artifacts
