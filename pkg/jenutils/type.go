@@ -46,7 +46,15 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 		return Type(stmt.Index(), t.Elem())
 
 	case *types.Chan:
-		return Type(stmt.Chan(), t.Elem())
+		if t.Dir() == types.RecvOnly {
+			stmt = stmt.Op("<-")
+		}
+		stmt = stmt.Chan()
+		if t.Dir() == types.SendOnly {
+			stmt = stmt.Op("<-")
+		}
+
+		return Type(stmt, t.Elem())
 
 	case *types.Map:
 		return Type(stmt.Map(Type(&jen.Statement{}, t.Key())), t.Elem())
