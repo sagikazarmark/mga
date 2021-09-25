@@ -43,6 +43,15 @@ func (g Generator) RegisterMarkers(into *markers.Registry) error {
 	return nil
 }
 
+func (Generator) CheckFilter() loader.NodeFilter {
+	return func(node ast.Node) bool {
+		// ignore non-interfaces
+		// _, isIface := node.(*ast.InterfaceType)
+
+		return true
+	}
+}
+
 func (g Generator) Generate(ctx *genall.GenerationContext) error {
 	var headerText string
 
@@ -70,12 +79,7 @@ func (g Generator) Generate(ctx *genall.GenerationContext) error {
 }
 
 func (g Generator) generatePackage(ctx *genall.GenerationContext, headerText string, root *loader.Package) []byte {
-	ctx.Checker.Check(root, func(node ast.Node) bool {
-		// ignore non-interfaces
-		// _, isIface := node.(*ast.InterfaceType)
-
-		return true
-	})
+	ctx.Checker.Check(root)
 
 	root.NeedTypesInfo()
 
