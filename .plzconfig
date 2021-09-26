@@ -6,7 +6,7 @@ importpath = sagikazarmark.dev/mga
 
 [buildconfig]
 golangci-lint-version = 1.42.1
-gotestsum-version = 0.5.3
+gotestsum-version = 1.7.0
 
 [alias "lint"]
 desc = Runs linters for this repo
