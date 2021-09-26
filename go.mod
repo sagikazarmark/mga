@@ -16,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	github.com/vbauerster/mpb/v4 v4.12.2
-	github.com/vektra/mockery/v2 v2.2.1
+	github.com/vektra/mockery/v2 v2.9.4
 	golang.org/x/tools v0.1.6
 	sigs.k8s.io/controller-tools v0.7.0
 )
