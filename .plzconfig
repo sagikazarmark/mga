@@ -5,7 +5,7 @@ version = 15.5.0
 importpath = sagikazarmark.dev/mga
 
 [buildconfig]
-golangci-lint-version = 1.31.0
+golangci-lint-version = 1.42.1
 gotestsum-version = 0.5.3
 
 [alias "lint"]

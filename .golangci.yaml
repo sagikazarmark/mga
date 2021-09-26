@@ -1,0 +1,14 @@
+linters-settings:
+    gci:
+        local-prefixes: sagikazarmark.dev/mga
+    goimports:
+        local-prefixes: sagikazarmark.dev/mga
+    golint:
+        min-confidence: 0
+
+linters:
+    presets:
+        - bugs
+        - unused
+        - format
+        - import
