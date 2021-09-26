@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 
 	"sagikazarmark.dev/mga/internal/generate/kit/endpoint/endpointgen/test/svctypes"
 )
