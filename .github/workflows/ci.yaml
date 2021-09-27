@@ -31,7 +31,7 @@ jobs:
         uses: sagikazarmark/setup-please-action@v0
 
       - name: Generate
-        run: plz generate
+        run: plz gen
 
       - name: Test
         run: |
@@ -57,7 +57,7 @@ jobs:
         uses: sagikazarmark/setup-please-action@v0
 
       - name: Generate
-        run: plz generate
+        run: plz gen
 
       - name: Lint
         run: plz lint

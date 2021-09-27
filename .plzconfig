@@ -16,7 +16,7 @@ cmd = run ///pleasings2//tools/go:golangci-lint -- run
 desc = Runs tests for this repo
 cmd = run ///pleasings2//tools/go:gotestsum -- --no-summary=skipped --format short -- -race -covermode=atomic -coverprofile=plz-out/log/coverage.txt ./...
 
-[alias "generate"]
+[alias "gen"]
 desc = Generate code
 cmd = run //:generate --
 
