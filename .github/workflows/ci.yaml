@@ -89,19 +89,19 @@ jobs:
         run: plz build :artifacts
 
       - name: Upload linux artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: mga_linux_amd64.tar.gz
           path: plz-out/gen/mga_linux_amd64.tar.gz
 
       - name: Upload darwin artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: mga_darwin_amd64.tar.gz
           path: plz-out/gen/mga_darwin_amd64.tar.gz
 
       - name: Upload checksums
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: checksums.txt
           path: plz-out/gen/checksums.txt
