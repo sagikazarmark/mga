@@ -5,14 +5,12 @@ go 1.17
 require (
 	emperror.dev/errors v0.8.0
 	github.com/AlecAivazis/survey/v2 v2.3.2
-	github.com/ThreeDotsLabs/watermill v1.1.0
+	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/dave/jennifer v1.4.1
 	github.com/fatih/color v1.13.0
-	github.com/go-kit/kit v0.12.0
 	github.com/gobuffalo/here v0.6.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/hashicorp/go-getter v1.5.8
-	github.com/sagikazarmark/kitx v0.16.0
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	github.com/vbauerster/mpb/v4 v4.12.2
@@ -55,7 +53,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/zerolog v1.18.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/ulikunitz/xz v0.5.8 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
