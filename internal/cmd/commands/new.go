@@ -95,7 +95,7 @@ func runNew(cmd *cobra.Command, options newOptions) error {
 		cmd.Println(color.BlueString("Initializing project"))
 
 		_, err = runSurvey()
-		if err == terminal.InterruptErr {
+		if errors.Is(err, terminal.InterruptErr) {
 			cmd.Println(color.YellowString(`Interrupted! Run "mga init" in your project to finish initializing it.`))
 
 			return nil
@@ -132,7 +132,7 @@ func ensureEmptyDir(path string) error {
 	}
 
 	_, err = file.Readdirnames(1)
-	if err != io.EOF {
+	if errors.Is(err, io.EOF) {
 		return errors.New("destination path already exists and is not an empty directory")
 	}
 
