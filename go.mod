@@ -11,7 +11,7 @@ require (
 	github.com/go-kit/kit v0.12.0
 	github.com/gobuffalo/here v0.6.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/hashicorp/go-getter v1.5.9
+	github.com/hashicorp/go-getter v1.5.10
 	github.com/sagikazarmark/kitx v0.16.0
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
@@ -26,7 +26,7 @@ require (
 	cloud.google.com/go/storage v1.18.2 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
-	github.com/aws/aws-sdk-go v1.42.23 // indirect
+	github.com/aws/aws-sdk-go v1.42.25 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -76,7 +76,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.63.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
