@@ -32,7 +32,7 @@ See the [Modern Go Application](https://github.com/sagikazarmark/modern-go-appli
 Download a prebuilt binary from the [Releases](https://github.com/sagikazarmark/mga/releases) page,
 or install the tool from source:
 
-```bash
+```shell
 go get sagikazarmark.dev/mga
 ```
 
@@ -63,7 +63,7 @@ type Service interface{
 
 Then run the generator:
 
-```bash
+```shell
 mga generate kit endpoint ./...
 ```
 
@@ -144,7 +144,7 @@ Contributions are welcome! :)
 1. Clone the repository
 1. Make changes on a new branch
 1. Run the test suite:
-    ```bash
+    ```shell
     ./pleasew build
     ./pleasew test
     ./pleasew gotest
@@ -155,4 +155,4 @@ Contributions are welcome! :)
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE) for more information.
+The project is licensed under the [MIT License](LICENSE).
