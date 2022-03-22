@@ -4,15 +4,13 @@ go 1.17
 
 require (
 	emperror.dev/errors v0.8.0
-	github.com/AlecAivazis/survey/v2 v2.3.2
+	github.com/AlecAivazis/survey/v2 v2.3.3
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/dave/jennifer v1.5.0
 	github.com/fatih/color v1.13.0
-	github.com/go-kit/kit v0.12.0
 	github.com/gobuffalo/here v0.6.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/hashicorp/go-getter v1.5.11
-	github.com/sagikazarmark/kitx v0.18.0
 	github.com/spf13/cobra v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/vbauerster/mpb/v4 v4.12.2
