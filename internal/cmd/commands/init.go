@@ -82,7 +82,7 @@ func runSurvey() (initSurvey, error) {
 	err = survey.AskOne(
 		&survey.Input{
 			Message: "Friendly application name?",
-			Default: strings.Title(strings.ReplaceAll(results.AppName, "-", " ")),
+			Default: strings.Title(strings.ReplaceAll(results.AppName, "-", " ")), // nolint
 			Help:    "User friendly application name (appearing eg. in logs)",
 		},
 		&friendlyAppName,
