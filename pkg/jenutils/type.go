@@ -64,11 +64,23 @@ func Type(stmt *jen.Statement, t types.Type) jen.Code {
 
 	case *types.Named:
 		if pkg := t.Obj().Pkg(); pkg != nil {
-			return stmt.Qual(pkg.Path(), t.Obj().Name())
+			stmt = stmt.Qual(pkg.Path(), t.Obj().Name())
+		} else {
+			stmt = stmt.Id(t.Obj().Name())
 		}
 
-		// builtin interfaces (eg. error) have no package
-		return stmt.Id(t.Obj().Name())
+		typeArgs := t.TypeArgs()
+		if typeArgs != nil {
+			var types []jen.Code
+
+			for i := 0; i < typeArgs.Len(); i++ {
+				types = append(types, Type(&jen.Statement{}, typeArgs.At(i)))
+			}
+
+			stmt.Types(types...)
+		}
+
+		return stmt
 
 	case *types.Pointer:
 		return Type(stmt.Op("*"), t.Elem())

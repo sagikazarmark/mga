@@ -36,6 +36,9 @@ func TestGenerate(t *testing.T) {
 		{
 			name: "different_package",
 		},
+		{
+			name: "generics",
+		},
 	}
 
 	for _, test := range tests {
