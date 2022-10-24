@@ -3,7 +3,7 @@ package endpoint
 import (
 	"fmt"
 	"go/types"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -82,7 +82,7 @@ func TestGenerate(t *testing.T) {
 				},
 			}
 
-			expected, err := ioutil.ReadFile(fmt.Sprintf("./testdata/generator/%s/endpoint/zz_generated.endpoint.go", test.name))
+			expected, err := os.ReadFile(fmt.Sprintf("./testdata/generator/%s/endpoint/zz_generated.endpoint.go", test.name))
 			require.NoError(t, err)
 
 			actual, err := Generate(file)
@@ -127,7 +127,7 @@ func TestGenerate_CustomModule(t *testing.T) {
 		},
 	}
 
-	expected, err := ioutil.ReadFile("./testdata/generator/custom_module/endpoint/zz_generated.endpoint.go")
+	expected, err := os.ReadFile("./testdata/generator/custom_module/endpoint/zz_generated.endpoint.go")
 	require.NoError(t, err)
 
 	actual, err := Generate(file)
@@ -185,7 +185,7 @@ func TestGenerate_MultipleServices(t *testing.T) {
 		},
 	}
 
-	expected, err := ioutil.ReadFile("./testdata/generator/multiple_services/endpoint/zz_generated.endpoint.go")
+	expected, err := os.ReadFile("./testdata/generator/multiple_services/endpoint/zz_generated.endpoint.go")
 	require.NoError(t, err)
 
 	actual, err := Generate(file)
@@ -228,7 +228,7 @@ func TestGenerate_ServiceError(t *testing.T) {
 		},
 	}
 
-	expected, err := ioutil.ReadFile("./testdata/generator/service_error/endpoint/zz_generated.endpoint.go")
+	expected, err := os.ReadFile("./testdata/generator/service_error/endpoint/zz_generated.endpoint.go")
 	require.NoError(t, err)
 
 	actual, err := Generate(file)
