@@ -10,98 +10,79 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    env:
-      GOFLAGS: -mod=readonly
 
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
-
-      - name: Compile Go stdlib for Darwin
-        run: go install -v std
-        env:
-          GOOS: darwin
+          go-version: 1.19
 
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Please
-        uses: sagikazarmark/setup-please-action@v0
-
-      - name: Generate
-        run: plz gen
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Test
-        run: |
-          plz test //...
-          plz gotest
+        run: nix develop -c task test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      GOFLAGS: -mod=readonly
 
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version: 1.19
 
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Please
-        uses: sagikazarmark/setup-please-action@v0
-
-      - name: Generate
-        run: plz gen
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
-        run: plz lint
+        run: nix develop -c task lint
+        env:
+          LINT_ARGS: --out-format=github-actions
 
   artifacts:
     name: Artifacts
     runs-on: ubuntu-latest
-    env:
-      GOFLAGS: -mod=readonly
 
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
-
-      - name: Compile Go stdlib for Darwin
-        run: go install -v std
-        env:
-          GOOS: darwin
+          go-version: 1.19
 
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Please
-        uses: sagikazarmark/setup-please-action@v0
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
-        run: plz build :artifacts
+        run: nix develop -c task snapshot
 
-      - name: Upload linux artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: mga_linux_amd64.tar.gz
-          path: plz-out/gen/mga_linux_amd64.tar.gz
-
-      - name: Upload darwin artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: mga_darwin_amd64.tar.gz
-          path: plz-out/gen/mga_darwin_amd64.tar.gz
-
-      - name: Upload checksums
-        uses: actions/upload-artifact@v3
-        with:
-          name: checksums.txt
-          path: plz-out/gen/checksums.txt
+          path: |
+            build/dist/mga_darwin_amd64.tar.gz
+            build/dist/mga_darwin_arm64.tar.gz
+            build/dist/mga_linux_amd64.tar.gz
+            build/dist/mga_linux_arm64.tar.gz
+            build/dist/mga_windows_amd64.zip
+            build/dist/mga_windows_arm64.zip
+            build/dist/checksums.txt
