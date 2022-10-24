@@ -141,16 +141,15 @@ See [Modern Go Application](https://github.com/sagikazarmark/modern-go-applicati
 
 Contributions are welcome! :)
 
-1. Clone the repository
-1. Make changes on a new branch
-1. Run the test suite:
-    ```shell
-    ./pleasew build
-    ./pleasew test
-    ./pleasew gotest
-    ./pleasew lint
-    ```
-1. Commit, push and open a PR
+When all coding and testing is done, please run the test suite:
+
+```shell
+task check
+```
+
+For the best developer experience, install [Nix](https://builtwithnix.org/) and [direnv](https://direnv.net/).
+
+Alternatively, install Go and [Task](https://taskfile.dev/) manually or using a package manager.
 
 
 ## License

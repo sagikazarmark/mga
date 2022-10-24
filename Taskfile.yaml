@@ -28,6 +28,7 @@ tasks:
 
   generate:
     deps: [build]
+    run: once
     cmds:
       - PATH="{{.ROOT_DIR}}/{{.BUILD_DIR}}:$PATH" go generate -x ./...
       - "{{.BUILD_DIR}}/mga generate kit endpoint ./..."
@@ -48,6 +49,11 @@ tasks:
     deps: [generate]
     cmds:
       - golangci-lint run $LINT_ARGS
+
+  check:
+    cmds:
+      - task: test
+      - task: lint
 
   fmt:
     cmds:
