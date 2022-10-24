@@ -11,6 +11,9 @@ trim_trailing_whitespace = true
 [{Makefile,*.mk}]
 indent_style = tab
 
+[{Taskfile.yaml,.goreleaser.yaml}]
+indent_size = 2
+
 [*.nix]
 indent_size = 2
 

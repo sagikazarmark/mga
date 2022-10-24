@@ -1,9 +1,6 @@
 /.direnv/
+/.task/
 /bin/
 /build/
 /tmp/
 /vendor/
-
-# Please output directory and local configuration
-plz-out
-.plzconfig.local

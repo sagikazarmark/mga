@@ -1,0 +1,60 @@
+version: '3'
+
+vars:
+  BUILD_DIR: build
+
+tasks:
+  build:
+    cmds:
+      - cmd: mkdir -p {{.BUILD_DIR}}
+        silent: true
+      - go build -o {{.BUILD_DIR}}/mga
+    sources:
+      - internal/cmd/**/*.go
+      - internal/generate/event/dispatcher/*.go
+      - internal/generate/event/dispatcher/dispatchergen/*.go
+      - internal/generate/event/handler/*.go
+      - internal/generate/event/handler/handlergen/*.go
+      - internal/generate/kit/endpoint/*.go
+      - internal/generate/kit/endpoint/endpointgen/*.go
+      - internal/generate/testify/mock/*.go
+      - internal/generate/testify/mock/mockgen/*.go
+      - internal/scaffold/service/*.go
+      - pkg/**/*.go
+      - "*.go"
+      - go.*
+
+  generate:
+    deps: [build]
+    cmds:
+      - PATH="{{.ROOT_DIR}}/{{.BUILD_DIR}}:$PATH" go generate -x ./...
+      - "{{.BUILD_DIR}}/mga generate kit endpoint ./..."
+      - "{{.BUILD_DIR}}/mga generate event handler ./..."
+      - "{{.BUILD_DIR}}/mga generate event handler --output subpkg:suffix=gen ./..."
+      - "{{.BUILD_DIR}}/mga generate event dispatcher ./..."
+      - "{{.BUILD_DIR}}/mga generate event dispatcher --output subpkg:suffix=gen ./..."
+      - "{{.BUILD_DIR}}/mga generate testify mock ./..."
+      - "{{.BUILD_DIR}}/mga generate testify mock --output subpkg:suffix=mocks ./..."
+      - "{{.BUILD_DIR}}/mga create service --force internal/scaffold/service/test"
+
+  test:
+    deps: [generate]
+    cmds:
+      - go test -v -race ./...
+
+  lint:
+    deps: [generate]
+    cmds:
+      - golangci-lint run $LINT_ARGS
+
+  fmt:
+    cmds:
+      - golangci-lint run --fix
+
+  snapshot:
+    cmds:
+      - goreleaser release --rm-dist --skip-publish --snapshot
+
+  release:
+    cmds:
+      - goreleaser release --rm-dist

@@ -3,6 +3,11 @@ run:
         # See https://github.com/mvdan/gofumpt/issues/142
         - internal/scaffold/service/test/service.go
 
+        - internal/generate/testify/mock/mockgen/test/service.go
+
+        # TODO: fix ioutil
+        - internal/generate/kit/endpoint/generator_test.go
+
 linters-settings:
     gci:
         local-prefixes: sagikazarmark.dev/mga

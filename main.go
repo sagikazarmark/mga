@@ -15,7 +15,7 @@ import (
 var (
 	version    string
 	commitHash string
-	buildDate  string
+	commitDate string
 )
 
 const (
@@ -39,7 +39,7 @@ func main() {
 		},
 	}
 
-	rootCmd.SetVersionTemplate(fmt.Sprintf("%s version %s (%s) built on %s\n", appName, version, commitHash, buildDate))
+	rootCmd.SetVersionTemplate(fmt.Sprintf("%s version %s (%s) on %s\n", appName, version, commitHash, commitDate))
 
 	rootCmd.PersistentFlags().BoolVar(&noColor, "no-color", false, "Disable colorized output")
 
