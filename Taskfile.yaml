@@ -23,6 +23,8 @@ tasks:
       - pkg/**/*.go
       - "*.go"
       - go.*
+    generates:
+      - "{{.BUILD_DIR}}/mga"
 
   generate:
     deps: [build]
