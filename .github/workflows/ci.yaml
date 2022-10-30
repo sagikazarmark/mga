@@ -10,6 +10,9 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop -c bash {0}
 
     steps:
       - name: Set up Go
@@ -28,11 +31,13 @@ jobs:
 
       - name: Test
         run: task test
-        shell: nix develop -c bash {0}
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop -c bash {0}
 
     steps:
       - name: Set up Go
@@ -51,13 +56,15 @@ jobs:
 
       - name: Lint
         run: task lint
-        shell: nix develop -c bash {0}
         env:
           LINT_ARGS: --out-format=github-actions
 
   artifacts:
     name: Artifacts
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: nix develop -c bash {0}
 
     steps:
       - name: Set up Go
@@ -76,7 +83,6 @@ jobs:
 
       - name: Build
         run: task snapshot
-        shell: nix develop -c bash {0}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
