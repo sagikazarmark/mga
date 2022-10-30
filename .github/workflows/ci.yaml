@@ -27,7 +27,8 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Test
-        run: nix develop -c task test
+        run: task test
+        shell: nix develop -c bash {0}
 
   lint:
     name: Lint
@@ -49,7 +50,8 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
-        run: nix develop -c task lint
+        run: task lint
+        shell: nix develop -c bash {0}
         env:
           LINT_ARGS: --out-format=github-actions
 
@@ -73,7 +75,8 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
-        run: nix develop -c task snapshot
+        run: task snapshot
+        shell: nix develop -c bash {0}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
