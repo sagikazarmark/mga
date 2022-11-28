@@ -11,16 +11,21 @@
       let
         pkgs = import nixpkgs { inherit system; };
       in
+      rec
       {
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            git
-            go_1_19
-            gnumake
-            go-task
-            golangci-lint
-            goreleaser
-          ];
+        devShells = {
+          default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              git
+              go_1_19
+              gnumake
+              go-task
+              golangci-lint
+              goreleaser
+            ];
+          };
+
+          ci = devShells.default;
         };
       });
 }
