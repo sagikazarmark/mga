@@ -23,6 +23,10 @@
               golangci-lint
               goreleaser
             ];
+
+            shellHook = ''
+              ${pkgs.go}/bin/go version
+            '';
           };
 
           ci = devShells.default;
