@@ -15,11 +15,6 @@ jobs:
         shell: nix develop -c bash {0}
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -40,11 +35,6 @@ jobs:
         shell: nix develop -c bash {0}
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
       - name: Checkout code
         uses: actions/checkout@v3
 
