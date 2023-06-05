@@ -4,10 +4,6 @@ on:
   push:
     tags: [ "v[0-9]+.[0-9]+.[0-9]+" ]
 
-defaults:
-  run:
-    shell: nix develop .#ci --impure -c bash {0}
-
 permissions:
   contents: read
 
@@ -30,6 +26,6 @@ jobs:
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish
-        run: task release
+        run: nix develop --impure .#ci -c task release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
