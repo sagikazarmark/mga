@@ -128,12 +128,13 @@ func runMockery(options mockeryOptions) error {
 		}
 	}
 
-	visitor := &pkg.GeneratorVisitor{
+	visitorConfig := pkg.GeneratorVisitorConfig{
 		InPackage:   options.fIP,
 		Note:        options.fNote,
-		Osp:         osp,
 		PackageName: options.fOutpkg,
 	}
+
+	visitor := pkg.NewGeneratorVisitor(visitorConfig, osp, false)
 
 	walker := pkg.Walker{
 		BaseDir:   options.fDir,

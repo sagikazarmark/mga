@@ -2,13 +2,11 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
   pull_request:
 
-defaults:
-  run:
-    shell: nix develop .#ci -c bash {0}
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -16,34 +14,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Set up Nix
-        uses: cachix/install-nix-action@v20
+        uses: cachix/install-nix-action@4b933aa7ebcc94a6174cf1364864e957b4910265 # v21
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Test
-        run: task test
+        run: nix develop --impure .#ci -c task test
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Set up Nix
-        uses: cachix/install-nix-action@v20
+        uses: cachix/install-nix-action@4b933aa7ebcc94a6174cf1364864e957b4910265 # v21
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint
-        run: task lint
+        run: nix develop --impure .#ci -c task lint
         env:
           LINT_ARGS: --out-format=github-actions
 
@@ -52,17 +50,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Set up Nix
-        uses: cachix/install-nix-action@v20
+        uses: cachix/install-nix-action@4b933aa7ebcc94a6174cf1364864e957b4910265 # v21
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
-        run: task snapshot
+        run: nix develop --impure .#ci -c task snapshot
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -75,3 +73,15 @@ jobs:
             build/dist/mga_windows_amd64.zip
             build/dist/mga_windows_arm64.zip
             build/dist/checksums.txt
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@1360a344ccb0ab6e9475edef90ad2f46bf8003b1 # v3.0.6

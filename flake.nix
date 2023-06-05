@@ -2,34 +2,52 @@
   description = "MGA: Modern Go Application tool";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    devenv.url = "github:cachix/devenv";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      rec
-      {
-        devShells = {
-          default = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              git
-              go_1_19
+  outputs = inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        inputs.devenv.flakeModule
+      ];
+
+      systems = [ "x86_64-linux" "x86_64-darwin" "aarch64-darwin" ];
+
+      perSystem = { config, self', inputs', pkgs, system, ... }: rec {
+        devenv.shells = {
+          default = {
+            languages = {
+              go.enable = true;
+            };
+
+            packages = with pkgs; [
               gnumake
               go-task
+
               golangci-lint
+
               goreleaser
             ];
 
-            shellHook = ''
-              ${pkgs.go}/bin/go version
+            scripts = {
+              versions.exec = ''
+                go version
+                golangci-lint version
+              '';
+            };
+
+            enterShell = ''
+              versions
             '';
+
+            # https://github.com/cachix/devenv/issues/528#issuecomment-1556108767
+            containers = pkgs.lib.mkForce { };
           };
 
-          ci = devShells.default;
+          ci = devenv.shells.default;
         };
-      });
+      };
+    };
 }

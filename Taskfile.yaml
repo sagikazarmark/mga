@@ -30,14 +30,15 @@ tasks:
     deps: [build]
     run: once
     cmds:
-      - PATH="{{.ROOT_DIR}}/{{.BUILD_DIR}}:$PATH" go generate -x ./...
-      - "{{.BUILD_DIR}}/mga generate kit endpoint ./..."
-      - "{{.BUILD_DIR}}/mga generate event handler ./..."
-      - "{{.BUILD_DIR}}/mga generate event handler --output subpkg:suffix=gen ./..."
-      - "{{.BUILD_DIR}}/mga generate event dispatcher ./..."
-      - "{{.BUILD_DIR}}/mga generate event dispatcher --output subpkg:suffix=gen ./..."
-      - "{{.BUILD_DIR}}/mga generate testify mock ./..."
-      - "{{.BUILD_DIR}}/mga generate testify mock --output subpkg:suffix=mocks ./..."
+      # Paths changed to internal due to the introduction of devenv
+      - PATH="{{.ROOT_DIR}}/{{.BUILD_DIR}}:$PATH" go generate -x ./internal/...
+      - "{{.BUILD_DIR}}/mga generate kit endpoint ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate event handler ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate event handler --output subpkg:suffix=gen ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate event dispatcher ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate event dispatcher --output subpkg:suffix=gen ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate testify mock ./internal/..."
+      - "{{.BUILD_DIR}}/mga generate testify mock --output subpkg:suffix=mocks ./internal/..."
       - "{{.BUILD_DIR}}/mga create service --force internal/scaffold/service/test"
 
   test:

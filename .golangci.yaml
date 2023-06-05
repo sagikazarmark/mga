@@ -19,3 +19,7 @@ linters:
         - unused
         - format
         - import
+    disable:
+        - depguard
+        - musttag
+        - gocheckcompilerdirectives
