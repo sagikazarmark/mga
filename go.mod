@@ -8,15 +8,13 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.1.1
 	github.com/dave/jennifer v1.6.1
 	github.com/fatih/color v1.15.0
-	github.com/go-kit/kit v0.12.0
 	github.com/gobuffalo/here v0.6.7
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/hashicorp/go-getter v1.7.1
-	github.com/sagikazarmark/kitx v0.18.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.3
 	github.com/vbauerster/mpb/v4 v4.12.2
-	github.com/vektra/mockery/v2 v2.28.2
+	github.com/vektra/mockery/v2 v2.30.17
 	golang.org/x/tools v0.9.3
 	sigs.k8s.io/controller-tools v0.12.0
 )
@@ -74,7 +72,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.16.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	go.opencensus.io v0.24.0 // indirect
