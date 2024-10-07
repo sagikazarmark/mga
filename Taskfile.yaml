@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   BUILD_DIR: build
@@ -62,8 +62,8 @@ tasks:
 
   snapshot:
     cmds:
-      - goreleaser release --rm-dist --skip-publish --snapshot
+      - goreleaser release --clean --snapshot
 
   release:
     cmds:
-      - goreleaser release --rm-dist
+      - goreleaser release --clean

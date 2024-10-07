@@ -8,7 +8,8 @@ type Event struct {
 	ID string
 }
 
-// go:generate go run sagikazarmark.dev/mga generate event dispatcher --outdir . Events
+//go:generate go run sagikazarmark.dev/mga generate event dispatcher
+
 // +mga:event:dispatcher
 type Events interface {
 	// Event dispatches an Event event.

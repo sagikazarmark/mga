@@ -19,7 +19,10 @@
         devenv.shells = {
           default = {
             languages = {
-              go.enable = true;
+              go = {
+                enable = true;
+                package = pkgs.go_1_23;
+              };
             };
 
             packages = with pkgs; [
