@@ -1,5 +1,5 @@
-run:
-    skip-files:
+issues:
+    exclude-files:
         # See https://github.com/mvdan/gofumpt/issues/142
         - internal/scaffold/service/test/service.go
 
@@ -7,11 +7,12 @@ run:
 
 linters-settings:
     gci:
-        local-prefixes: sagikazarmark.dev/mga
+        sections:
+            - standard
+            - default
+            - prefix(sagikazarmark.dev/mga)
     goimports:
         local-prefixes: sagikazarmark.dev/mga
-    golint:
-        min-confidence: 0
 
 linters:
     presets:

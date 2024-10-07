@@ -1,3 +1,5 @@
+version: 2
+
 dist: build/dist
 
 builds:
@@ -22,10 +24,10 @@ archives:
         format: zip
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 changelog:
-  skip: true
+  disable: true

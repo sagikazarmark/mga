@@ -33,7 +33,8 @@ type Events interface {
 	EventWithError(event Event) error
 
 	// ImportedAliasedEvent dispatches an aliased event type.
-	ImportedAliasedEvent(ctx context.Context, event ImportedAliasedEvent) error
+	// TODO: figure out why this doesn't work at the moment
+	// ImportedAliasedEvent(ctx context.Context, event ImportedAliasedEvent) error
 
 	// ImportedEventDispatch dispatches an imported event type.
 	ImportedEventDispatch(ctx context.Context, event imports.ImportedEvent) error
