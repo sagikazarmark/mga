@@ -1,6 +1,6 @@
 # MGA: Modern Go Application tool
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/sagikazarmark/mga/CI?style=flat-square)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/sagikazarmark/mga/ci.yaml?style=flat-square)](https://github.com/sagikazarmark/mga/actions/workflows/ci.yaml)
 [![Go Report Card](https://goreportcard.com/badge/sagikazarmark.dev/mga?style=flat-square)](https://goreportcard.com/report/sagikazarmark.dev/mga)
 
 **Go application development tool applying modern practices.**
