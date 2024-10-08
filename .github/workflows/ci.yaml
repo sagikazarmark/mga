@@ -81,7 +81,7 @@ jobs:
         run: nix develop --impure .#ci -c task snapshot
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: |
             build/dist/mga_darwin_amd64.tar.gz
