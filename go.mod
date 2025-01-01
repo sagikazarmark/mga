@@ -7,18 +7,16 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/ThreeDotsLabs/watermill v1.3.7
 	github.com/dave/jennifer v1.7.1
-	github.com/fatih/color v1.17.0
-	github.com/go-kit/kit v0.13.0
+	github.com/fatih/color v1.18.0
 	github.com/gobuffalo/here v0.6.7
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-getter v1.7.6
-	github.com/sagikazarmark/kitx v0.20.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/vbauerster/mpb/v4 v4.12.2
 	github.com/vektra/mockery/v2 v2.46.2
-	golang.org/x/tools v0.26.0
-	sigs.k8s.io/controller-tools v0.16.3
+	golang.org/x/tools v0.28.0
+	sigs.k8s.io/controller-tools v0.17.0
 )
 
 require (
@@ -75,7 +73,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.15.0 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.24.0 // indirect
@@ -87,7 +84,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/mod v0.21.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
@@ -104,5 +101,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apimachinery v0.31.0 // indirect
+	k8s.io/apimachinery v0.32.0 // indirect
 )
