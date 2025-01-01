@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 
 	oldtodo "sagikazarmark.dev/mga/internal/generate/testify/mock/mockgen/test/subpkg"
 )
@@ -16,8 +16,9 @@ type Todo struct {
 	Done bool
 }
 
-//go:generate mga gen mockery --name Service
 // +testify:mock
+//
+//go:generate mga gen mockery --name Service
 type Service interface {
 	// CreateTodo adds a new todo to the todo list.
 	CreateTodo(ctx context.Context, text string) (id string, err error)
@@ -35,8 +36,9 @@ type Service interface {
 	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
 }
 
-//go:generate mga gen mockery --name Service2
 // +testify:mock:testOnly=true
+//
+//go:generate mga gen mockery --name Service2
 type Service2 interface {
 	// CreateTodo adds a new todo to the todo list.
 	CreateTodo(ctx context.Context, text string) (id string, err error)
@@ -54,17 +56,19 @@ type Service2 interface {
 	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
 }
 
-//go:generate mga gen mockery --name Service3
 // +testify:mock
 // from: https://github.com/sagikazarmark/mga/issues/34
+//
+//go:generate mga gen mockery --name Service3
 type Service3 interface {
 	// nolint: lll
 	Refresh(ctx context.Context, refreshToken string, deviceID string, userName string, jwtToken *jwt.Token) (string, string, error)
 }
 
-//go:generate mga gen mockery --name Service4UnnamedParametersAndResults
 // +testify:mock
 // from https://github.com/sagikazarmark/mga/pull/42 #1.
+//
+//go:generate mga gen mockery --name Service4UnnamedParametersAndResults
 type Service4UnnamedParametersAndResults interface {
 	NamedParametersAndResults(isEnabled bool, count int, name string) (values []string, owner string, err error)
 
@@ -79,18 +83,20 @@ type Service4UnnamedParametersAndResults interface {
 	UnnamedResults(isEnabled bool, count int, name string) ([]string, string, error)
 }
 
-//go:generate mga gen mockery --name Service5VariadicParameters
 // +testify:mock
 // from https://github.com/sagikazarmark/mga/pull/42 #2.
+//
+//go:generate mga gen mockery --name Service5VariadicParameters
 type Service5VariadicParameters interface {
 	Regular(id string, count int, arguments []interface{}) (err error)
 
 	Variadic(id string, count int, arguments ...interface{}) (err error)
 }
 
-//go:generate mga gen mockery --name Service6FunctionParameters
 // +testify:mock
 // from https://github.com/sagikazarmark/mga/pull/42 #3.
+//
+//go:generate mga gen mockery --name Service6FunctionParameters
 type Service6FunctionParameters interface {
 	FunctionParameter(id string, predicate func(id oldtodo.ID, todo oldtodo.OldTodo) bool, count int) (err error)
 
@@ -102,8 +108,9 @@ type Service6FunctionParameters interface {
 	) (err error)
 }
 
-//go:generate mga gen mockery --name Service7
 // +testify:mock:external=true
+//
+//go:generate mga gen mockery --name Service7
 type Service7 interface {
 	// CreateTodo adds a new todo to the todo list.
 	CreateTodo(ctx context.Context, text string) (id string, err error)
@@ -121,8 +128,9 @@ type Service7 interface {
 	ImportOldTodo(ctx context.Context, oldTodo oldtodo.OldTodo) (id string, err error)
 }
 
-//go:generate mga gen mockery --name Service8
 // +testify:mock:external=true,testOnly=true
+//
+//go:generate mga gen mockery --name Service8
 type Service8 interface {
 	// CreateTodo adds a new todo to the todo list.
 	CreateTodo(ctx context.Context, text string) (id string, err error)
