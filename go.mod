@@ -5,14 +5,12 @@ go 1.23.1
 require (
 	emperror.dev/errors v0.8.1
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/ThreeDotsLabs/watermill v1.4.1
+	github.com/ThreeDotsLabs/watermill v1.4.3
 	github.com/dave/jennifer v1.7.1
 	github.com/fatih/color v1.18.0
-	github.com/go-kit/kit v0.13.0
 	github.com/gobuffalo/here v0.6.7
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-getter v1.7.6
-	github.com/sagikazarmark/kitx v0.20.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vbauerster/mpb/v4 v4.12.2
@@ -77,7 +75,6 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.24.0 // indirect
