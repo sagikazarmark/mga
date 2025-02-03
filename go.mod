@@ -8,15 +8,13 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.4.3
 	github.com/dave/jennifer v1.7.1
 	github.com/fatih/color v1.18.0
-	github.com/go-kit/kit v0.13.0
 	github.com/gobuffalo/here v0.6.7
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/hashicorp/go-getter v1.7.8
-	github.com/sagikazarmark/kitx v0.20.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vbauerster/mpb/v4 v4.12.2
-	github.com/vektra/mockery/v2 v2.51.0
+	github.com/vektra/mockery/v2 v2.52.1
 	golang.org/x/tools v0.29.0
 	sigs.k8s.io/controller-tools v0.17.1
 )
@@ -87,7 +85,6 @@ require (
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
